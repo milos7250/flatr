@@ -1,0 +1,13 @@
+{
+    "email": {
+        "user": "user gmail email address used for sending email",
+        "password": "password/key for login",
+        "from": "sender email address",
+        "to": ["first.recipient@gmail.com", "second.recipient@gmail.com"],
+        "subject": "Email subject"
+    },
+    "sites": {
+        "First site name": "first site query url",
+        "Second site name": "second site query url"
+    }
+}
