@@ -1,4 +1,5 @@
 src/config.json
 src/__pycache__/
+src/google_credentials.json
 .ipynb_checkpoints/
 *.ipynb

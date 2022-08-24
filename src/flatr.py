@@ -3,6 +3,9 @@ from gumtree import Gumtree
 import os
 import json
 from sys import exit
+import gspread
+import pandas as pd
+from datetime import datetime
 
 SRC_DIR = os.path.dirname(__file__)
 CONFIG_PATH = os.path.join(SRC_DIR, 'config.json')
@@ -24,12 +27,32 @@ def main():
 
 
     gumtree = Gumtree(sites['Gumtree'])
+
+    columns = ['Title', 'Price', 'Available', 'Posted', 'Link']
+
     listings = gumtree.get_listings()
-    divider = '\n\n' + '-' * 50 + '\n\n'
-    email_body = divider.join(map(str, listings))
-    # print(email_body)
-    email = EmailClient(email_config)
-    email.send(email_body)
+
+    new_flats = pd.DataFrame(list(map(lambda x: x.to_list(), listings)), columns=columns)
+    new_flats['Added'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+    new_flats['Notes'] = ''
+
+
+    google_credentials = config['google_credentials']
+    gc = gspread.service_account(filename=google_credentials)
+    sh = gc.open('flathunt2022')
+    gumtree_sheet = sh.worksheet('Gumtree')
+    df_gumtree = pd.DataFrame(gumtree_sheet.get_all_records())
+    headers = [df_gumtree.columns.values.tolist()]
+    current_entires = df_gumtree.values.tolist()
+    gumtree_sheet.update(headers + current_entires + new_flats.values.tolist())
+    
+
+
+    # divider = '\n\n' + '-' * 50 + '\n\n'
+    # email_body = divider.join(map(str, listings))
+
+    # email = EmailClient(email_config)
+    # email.send(email_body)
 
 
     exit(0)

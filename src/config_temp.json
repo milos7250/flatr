@@ -1,4 +1,5 @@
 {
+    "google_credentials": "path/to/google_credentials.json",
     "email": {
         "user": "user gmail email address used for sending email",
         "password": "password/key for login",
