@@ -32,10 +32,10 @@ def main():
 
     listings = gumtree.get_listings()
 
-    new_flats = pd.DataFrame(list(map(lambda x: x.to_list(), listings)), columns=columns)
+    # new_flats = pd.DataFrame(list(map(lambda x: x.to_list(), listings)), columns=columns)
+    new_flats = pd.DataFrame(listings, columns=columns)
     new_flats['Added'] = datetime.now().strftime('%Y-%m-%d %H:%M')
     new_flats['Notes'] = ''
-
 
     google_credentials = config['google_credentials']
     gc = gspread.service_account(filename=google_credentials)
@@ -44,7 +44,15 @@ def main():
     df_gumtree = pd.DataFrame(gumtree_sheet.get_all_records())
     headers = [df_gumtree.columns.values.tolist()]
     current_entires = df_gumtree.values.tolist()
-    gumtree_sheet.update(headers + current_entires + new_flats.values.tolist())
+
+    if df_gumtree.empty:
+        headers = [new_flats.columns.values.tolist()]
+        gumtree_sheet.update(headers + new_flats.values.tolist())
+
+    else:
+        links = set(df_gumtree['Link'].values)
+        new_flats = new_flats.loc[~new_flats['Link'].isin(links)]
+        gumtree_sheet.update(headers + current_entires + new_flats.values.tolist())
     
 
 

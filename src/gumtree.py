@@ -13,10 +13,23 @@ class Gumtree:
         title = listing.select('.listing-title')[0].string.strip('\n')
         link = Gumtree.PREPEND + listing.select('.listing-link')[0]['href']
         price = listing.select('.listing-price')[0].strong.string
-        available = listing.select('.listing-attributes')[0].findAll('li')[1].findAll('span')[-1].string
+        available = self.get_available(listing)
         posted = listing.select('.listing-posted-date')[0].span.contents[-1].strip('\n')
 
-        return Listing(title, link, price, available, posted)
+        return (title, price, available, posted, link)
+
+    def get_available(self, listing):
+        attributes = dict()
+
+        for li in listing.select('.listing-attributes')[0].findAll('li'):
+            list(map(lambda x: x.string, li.findAll('span')))
+            key, value = li.findAll('span')
+            attributes[key.string] = value.string
+        
+        if 'Date available' in attributes:
+            return attributes['Date available']
+
+        return 'N/A'
 
     def get_listings(self):
         raw_listings = self.soup.find_all('li', {'class':'natural'})
@@ -24,4 +37,4 @@ class Gumtree:
         for listing in raw_listings:
             listings.append(self.parse_listing(listing))
 
-        return listings
+        return listings[::-1]
