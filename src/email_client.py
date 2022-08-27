@@ -6,11 +6,13 @@ from sys import exit
 class EmailClient:
     def __init__(self, config):
         self.config = config
+        
         try:
             self.message = MIMEMultipart()
             self.message['From'] = self.config['from']
             self.message['To'] = ','.join(self.config['to'])
             self.message['Subject'] = self.config['subject']
+        
         except KeyError as e:
             print(f'Invalid configuration key {e}. Check the "config_temp.json" file for proper keys.')
             exit(1)
@@ -28,7 +30,7 @@ class EmailClient:
         except KeyError as e:
             print(f'Invalid configuration key {e}. Check the "config_temp.json" file for proper keys.')
             exit(1)
+       
         except TimeoutError as e:
             print(f'SMTP session timed out. Check SMTP is properly configured.\n{e}')
             exit(1)
-

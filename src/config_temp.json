@@ -1,5 +1,6 @@
 {
     "google_credentials": "path/to/google_credentials.json",
+    "spreadsheet": "spreadsheet title",
     "email": {
         "user": "user gmail email address used for sending email",
         "password": "password/key for login",

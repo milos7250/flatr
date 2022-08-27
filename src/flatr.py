@@ -10,6 +10,10 @@ from datetime import datetime
 SRC_DIR = os.path.dirname(__file__)
 CONFIG_PATH = os.path.join(SRC_DIR, 'config.json')
 
+def listing_to_email(listing) -> str:
+    title, price, available, _, link, *_ = listing
+    return f'{title}\n{available}\nPrice: {price}\n{link}'
+
 def main():
     if not os.path.exists(CONFIG_PATH):
         print(f'Config file not found at {CONFIG_PATH}')
@@ -21,25 +25,22 @@ def main():
     try:
         sites = config['sites']
         email_config = config['email']
+        spreadsheet = config['spreadsheet']
 
     except KeyError as e:
         print(e)
 
+    columns = ['Title', 'Price', 'Available', 'Link']
 
-    gumtree = Gumtree(sites['Gumtree'])
+    listings = Gumtree(sites['Gumtree']).get_listings()
 
-    columns = ['Title', 'Price', 'Available', 'Posted', 'Link']
-
-    listings = gumtree.get_listings()
-
-    # new_flats = pd.DataFrame(list(map(lambda x: x.to_list(), listings)), columns=columns)
     new_flats = pd.DataFrame(listings, columns=columns)
-    new_flats['Added'] = datetime.now().strftime('%Y-%m-%d %H:%M')
+    new_flats.insert(3, 'Added', datetime.now().strftime('%Y-%m-%d %H:%M'))
     new_flats['Notes'] = ''
 
     google_credentials = config['google_credentials']
     gc = gspread.service_account(filename=google_credentials)
-    sh = gc.open('flathunt2022')
+    sh = gc.open(spreadsheet)
     gumtree_sheet = sh.worksheet('Gumtree')
     df_gumtree = pd.DataFrame(gumtree_sheet.get_all_records())
     headers = [df_gumtree.columns.values.tolist()]
@@ -54,14 +55,14 @@ def main():
         new_flats = new_flats.loc[~new_flats['Link'].isin(links)]
         gumtree_sheet.update(headers + current_entires + new_flats.values.tolist())
     
+    if not new_flats.empty:
+        divider = '\n\n' + '-' * 50 + '\n\n'
+        email_body = divider.join(map(listing_to_email, new_flats.values.tolist()))
 
-
-    # divider = '\n\n' + '-' * 50 + '\n\n'
-    # email_body = divider.join(map(str, listings))
-
-    # email = EmailClient(email_config)
-    # email.send(email_body)
-
+        email = EmailClient(email_config)
+        email.send(email_body)
+    else:
+        print('No new flats.')
 
     exit(0)
 

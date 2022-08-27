@@ -1,6 +1,5 @@
 import requests
 from bs4 import BeautifulSoup
-from listing import Listing
 
 class Gumtree:
     PREPEND = 'gumtree.co.uk'
@@ -14,9 +13,9 @@ class Gumtree:
         link = Gumtree.PREPEND + listing.select('.listing-link')[0]['href']
         price = listing.select('.listing-price')[0].strong.string
         available = self.get_available(listing)
-        posted = listing.select('.listing-posted-date')[0].span.contents[-1].strip('\n')
 
-        return (title, price, available, posted, link)
+        return (title, price, available, link)
+
 
     def get_available(self, listing):
         attributes = dict()
