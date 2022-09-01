@@ -1,5 +1,6 @@
 from email_client import EmailClient
 from gumtree import Gumtree
+from zoopla import Zoopla
 import os
 import json
 from sys import exit
@@ -9,10 +10,65 @@ from datetime import datetime
 
 SRC_DIR = os.path.dirname(__file__)
 CONFIG_PATH = os.path.join(SRC_DIR, 'config.json')
+COLUMNS = ['Title', 'Price', 'Available', 'Link']
+FLAT_DIVIDER = '\n\n' + '-' * 50 + '\n\n'
+SITE_DIVIDER = '\n\n' + '=' * 50 + '\n\n'
 
 def listing_to_email(listing) -> str:
     title, price, available, _, link, *_ = listing
     return f'{title}\n{available}\nPrice: {price}\n{link}'
+
+def update_gumtree(sh, link) -> pd.DataFrame:
+
+    # Accessing current flats for Gumtree    
+    gumtree_sheet = sh.worksheet('Gumtree')
+    df_gumtree = pd.DataFrame(gumtree_sheet.get_all_records())
+    headers = [df_gumtree.columns.values.tolist()]
+    current_entires = df_gumtree.values.tolist()
+
+    # Getting listings from Gumtree
+    listings = Gumtree(link).get_listings()
+    new_flats = pd.DataFrame(listings, columns=COLUMNS)
+    new_flats.insert(3, 'Added', datetime.now().strftime('%Y-%m-%d %H:%M'))
+    new_flats['Notes'] = ''
+
+    # Sheet for Gumtree is empty -> first flats in sheet
+    if df_gumtree.empty:
+        headers = [new_flats.columns.values.tolist()]
+        gumtree_sheet.update(headers + new_flats.values.tolist())
+
+    else:
+        links = set(df_gumtree['Link'].values)
+        new_flats = new_flats.loc[~new_flats['Link'].isin(links)]
+        gumtree_sheet.update(headers + current_entires + new_flats.values.tolist())
+
+    return new_flats
+
+def update_zoopla(sh, link) -> pd.DataFrame:
+
+    # Accessing current flats for Zoopla    
+    zoopla_sheet = sh.worksheet('Zoopla')
+    df_zoopla = pd.DataFrame(zoopla_sheet.get_all_records())
+    headers = [df_zoopla.columns.values.tolist()]
+    current_entires = df_zoopla.values.tolist()
+
+    # Getting listings from Zoopla
+    listings = Zoopla(link).get_listings()
+    new_flats = pd.DataFrame(listings, columns=COLUMNS)
+    new_flats.insert(3, 'Added', datetime.now().strftime('%Y-%m-%d %H:%M'))
+    new_flats['Notes'] = ''
+
+    # Sheet for Zoopla is empty -> first flats in sheet
+    if df_zoopla.empty:
+        headers = [new_flats.columns.values.tolist()]
+        zoopla_sheet.update(headers + new_flats.values.tolist())
+
+    else:
+        links = set(df_zoopla['Link'].values)
+        new_flats = new_flats.loc[~new_flats['Link'].isin(links)]
+        zoopla_sheet.update(headers + current_entires + new_flats.values.tolist())
+
+    return new_flats
 
 def main():
     if not os.path.exists(CONFIG_PATH):
@@ -30,35 +86,31 @@ def main():
     except KeyError as e:
         print(e)
 
-    columns = ['Title', 'Price', 'Available', 'Link']
-
-    listings = Gumtree(sites['Gumtree']).get_listings()
-
-    new_flats = pd.DataFrame(listings, columns=columns)
-    new_flats.insert(3, 'Added', datetime.now().strftime('%Y-%m-%d %H:%M'))
-    new_flats['Notes'] = ''
-
+    # Accessing the Google Sheets
     google_credentials = config['google_credentials']
     gc = gspread.service_account(filename=google_credentials)
     sh = gc.open(spreadsheet)
-    gumtree_sheet = sh.worksheet('Gumtree')
-    df_gumtree = pd.DataFrame(gumtree_sheet.get_all_records())
-    headers = [df_gumtree.columns.values.tolist()]
-    current_entires = df_gumtree.values.tolist()
 
-    if df_gumtree.empty:
-        headers = [new_flats.columns.values.tolist()]
-        gumtree_sheet.update(headers + new_flats.values.tolist())
-
-    else:
-        links = set(df_gumtree['Link'].values)
-        new_flats = new_flats.loc[~new_flats['Link'].isin(links)]
-        gumtree_sheet.update(headers + current_entires + new_flats.values.tolist())
+    # Update flats for Gumtree
+    gumtree_flats = update_gumtree(sh, sites['Gumtree'])
     
-    if not new_flats.empty:
-        divider = '\n\n' + '-' * 50 + '\n\n'
-        email_body = divider.join(map(listing_to_email, new_flats.values.tolist()))
+    # Update flats for Zoopla
+    zoopla_flats = update_zoopla(sh, sites['Zoopla'])
 
+    email_body = ''
+
+    if not gumtree_flats.empty:
+        email_body += f'{gumtree_flats.shape[0]} New flat(s) on Gumtree' + FLAT_DIVIDER
+        email_body += FLAT_DIVIDER.join(map(listing_to_email, gumtree_flats.values.tolist()))
+
+    if not zoopla_flats.empty:
+        if email_body != '':
+            email_body += SITE_DIVIDER
+
+        email_body += f'{zoopla_flats.shape[0]} New flat(s) on Zoopla' + FLAT_DIVIDER
+        email_body += FLAT_DIVIDER.join(map(listing_to_email, zoopla_flats.values.tolist()))
+
+    if email_body != '':
         email = EmailClient(email_config)
         email.send(email_body)
     else:
