@@ -1,5 +1,6 @@
 from email_client import EmailClient
 from gumtree import Gumtree
+from onthemarket import OnTheMarket
 from zoopla import Zoopla
 import os
 import json
@@ -70,6 +71,32 @@ def update_zoopla(sh, link) -> pd.DataFrame:
 
     return new_flats
 
+def update_onthemarket(sh, link) -> pd.DataFrame:
+
+    # Accessing current flats for OnTheMarket    
+    onthemarket_sheet = sh.worksheet('OnTheMarket')
+    df_onthemarket = pd.DataFrame(onthemarket_sheet.get_all_records())
+    headers = [df_onthemarket.columns.values.tolist()]
+    current_entires = df_onthemarket.values.tolist()
+
+    # Getting listings from OnTheMarket
+    listings = OnTheMarket(link).get_listings()
+    new_flats = pd.DataFrame(listings, columns=COLUMNS)
+    new_flats.insert(3, 'Added', datetime.now().strftime('%Y-%m-%d %H:%M'))
+    new_flats['Notes'] = ''
+
+    # Sheet for OnTheMarket is empty -> first flats in sheet
+    if df_onthemarket.empty:
+        headers = [new_flats.columns.values.tolist()]
+        onthemarket_sheet.update(headers + new_flats.values.tolist())
+
+    else:
+        links = set(df_onthemarket['Link'].values)
+        new_flats = new_flats.loc[~new_flats['Link'].isin(links)]
+        onthemarket_sheet.update(headers + current_entires + new_flats.values.tolist())
+
+    return new_flats
+
 def main():
     if not os.path.exists(CONFIG_PATH):
         print(f'Config file not found at {CONFIG_PATH}')
@@ -97,6 +124,9 @@ def main():
     # Update flats for Zoopla
     zoopla_flats = update_zoopla(sh, sites['Zoopla'])
 
+    # Update flats for OnTheMarket
+    onthemarket_flats = update_onthemarket(sh, sites['OnTheMarket'])
+
     email_body = ''
 
     if not gumtree_flats.empty:
@@ -109,6 +139,13 @@ def main():
 
         email_body += f'{zoopla_flats.shape[0]} New flat(s) on Zoopla' + FLAT_DIVIDER
         email_body += FLAT_DIVIDER.join(map(listing_to_email, zoopla_flats.values.tolist()))
+
+    if not onthemarket_flats.empty:
+        if email_body != '':
+            email_body += SITE_DIVIDER
+
+        email_body += f'{onthemarket_flats.shape[0]} New flat(s) on OnTheMarket' + FLAT_DIVIDER
+        email_body += FLAT_DIVIDER.join(map(listing_to_email, onthemarket_flats.values.tolist()))
 
     if email_body != '':
         email = EmailClient(email_config)
