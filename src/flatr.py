@@ -150,10 +150,12 @@ def main():
     if email_body != '':
         email = EmailClient(email_config)
         email.send(email_body)
-    else:
-        print('No new flats.')
 
     exit(0)
 
 if __name__ == '__main__':
-    main()
+    try:
+        main()
+    except Exception as e:
+        time = datetime.now().strftime('%Y-%m-%d %H:%M')
+        print(f'{time}: The following errors occured:\n\n{e}')

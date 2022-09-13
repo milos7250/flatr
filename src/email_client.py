@@ -25,7 +25,6 @@ class EmailClient:
             self.message.attach(MIMEText(email_body, 'plain'))
             text = self.message.as_string()
             session.sendmail(self.config['from'], self.config['to'], text)
-            print('Email sent')
 
         except KeyError as e:
             print(f'Invalid configuration key {e}. Check the "config_temp.json" file for proper keys.')
