@@ -6,7 +6,7 @@ import os
 import json
 from sys import exit
 import gspread
-import pandas as pd
+from pandas import DataFrame
 from datetime import datetime
 
 SRC_DIR = os.path.dirname(__file__)
@@ -15,85 +15,39 @@ COLUMNS = ['Title', 'Price', 'Available', 'Link']
 FLAT_DIVIDER = '\n\n' + '-' * 50 + '\n\n'
 SITE_DIVIDER = '\n\n' + '=' * 50 + '\n\n'
 
+SITE_CLASSES = {
+    'Gumtree': Gumtree,
+    'Zoopla': Zoopla,
+    'OnTheMarket': OnTheMarket
+}
+
 def listing_to_email(listing) -> str:
     title, price, available, _, link, *_ = listing
     return f'{title}\n{available}\nPrice: {price}\n{link}'
 
-def update_gumtree(sh, link) -> pd.DataFrame:
+def update_site(gsheet, site, link) -> DataFrame:
 
-    # Accessing current flats for Gumtree    
-    gumtree_sheet = sh.worksheet('Gumtree')
-    df_gumtree = pd.DataFrame(gumtree_sheet.get_all_records())
-    headers = [df_gumtree.columns.values.tolist()]
-    current_entires = df_gumtree.values.tolist()
+    # Accessing current flats for site
+    worksheet = gsheet.worksheet(site)
+    flats = DataFrame(worksheet.get_all_records())
+    headers = [flats.columns.values.tolist()]
+    current_entries = flats.values.tolist()
 
-    # Getting listings from Gumtree
-    listings = Gumtree(link).get_listings()
-    new_flats = pd.DataFrame(listings, columns=COLUMNS)
+    # Getting listings from site
+    listings = SITE_CLASSES[site](link).get_listings()
+    new_flats = DataFrame(listings, columns=COLUMNS)
     new_flats.insert(3, 'Added', datetime.now().strftime('%Y-%m-%d %H:%M'))
     new_flats['Notes'] = ''
 
-    # Sheet for Gumtree is empty -> first flats in sheet
-    if df_gumtree.empty:
+    # Sheet for site is empty -> first flats in sheet
+    if flats.empty:
         headers = [new_flats.columns.values.tolist()]
-        gumtree_sheet.update(headers + new_flats.values.tolist())
+        worksheet.update(headers + new_flats.values.tolist())
 
     else:
-        links = set(df_gumtree['Link'].values)
+        links = set(flats['Link'].values)
         new_flats = new_flats.loc[~new_flats['Link'].isin(links)]
-        gumtree_sheet.update(headers + current_entires + new_flats.values.tolist())
-
-    return new_flats
-
-def update_zoopla(sh, link) -> pd.DataFrame:
-
-    # Accessing current flats for Zoopla    
-    zoopla_sheet = sh.worksheet('Zoopla')
-    df_zoopla = pd.DataFrame(zoopla_sheet.get_all_records())
-    headers = [df_zoopla.columns.values.tolist()]
-    current_entires = df_zoopla.values.tolist()
-
-    # Getting listings from Zoopla
-    listings = Zoopla(link).get_listings()
-    new_flats = pd.DataFrame(listings, columns=COLUMNS)
-    new_flats.insert(3, 'Added', datetime.now().strftime('%Y-%m-%d %H:%M'))
-    new_flats['Notes'] = ''
-
-    # Sheet for Zoopla is empty -> first flats in sheet
-    if df_zoopla.empty:
-        headers = [new_flats.columns.values.tolist()]
-        zoopla_sheet.update(headers + new_flats.values.tolist())
-
-    else:
-        links = set(df_zoopla['Link'].values)
-        new_flats = new_flats.loc[~new_flats['Link'].isin(links)]
-        zoopla_sheet.update(headers + current_entires + new_flats.values.tolist())
-
-    return new_flats
-
-def update_onthemarket(sh, link) -> pd.DataFrame:
-
-    # Accessing current flats for OnTheMarket    
-    onthemarket_sheet = sh.worksheet('OnTheMarket')
-    df_onthemarket = pd.DataFrame(onthemarket_sheet.get_all_records())
-    headers = [df_onthemarket.columns.values.tolist()]
-    current_entires = df_onthemarket.values.tolist()
-
-    # Getting listings from OnTheMarket
-    listings = OnTheMarket(link).get_listings()
-    new_flats = pd.DataFrame(listings, columns=COLUMNS)
-    new_flats.insert(3, 'Added', datetime.now().strftime('%Y-%m-%d %H:%M'))
-    new_flats['Notes'] = ''
-
-    # Sheet for OnTheMarket is empty -> first flats in sheet
-    if df_onthemarket.empty:
-        headers = [new_flats.columns.values.tolist()]
-        onthemarket_sheet.update(headers + new_flats.values.tolist())
-
-    else:
-        links = set(df_onthemarket['Link'].values)
-        new_flats = new_flats.loc[~new_flats['Link'].isin(links)]
-        onthemarket_sheet.update(headers + current_entires + new_flats.values.tolist())
+        worksheet.update(headers + current_entries + new_flats.values.tolist())
 
     return new_flats
 
@@ -112,41 +66,27 @@ def main():
 
     except KeyError as e:
         print(e)
+        exit(1)
 
     # Accessing the Google Sheets
     google_credentials = config['google_credentials']
     gc = gspread.service_account(filename=google_credentials)
-    sh = gc.open(spreadsheet)
-
-    # Update flats for Gumtree
-    gumtree_flats = update_gumtree(sh, sites['Gumtree'])
-    
-    # Update flats for Zoopla
-    zoopla_flats = update_zoopla(sh, sites['Zoopla'])
-
-    # Update flats for OnTheMarket
-    onthemarket_flats = update_onthemarket(sh, sites['OnTheMarket'])
+    gsheet = gc.open(spreadsheet)
 
     email_body = ''
 
-    if not gumtree_flats.empty:
-        email_body += f'{gumtree_flats.shape[0]} New flat(s) on Gumtree' + FLAT_DIVIDER
-        email_body += FLAT_DIVIDER.join(map(listing_to_email, gumtree_flats.values.tolist()))
+    for site in sites.keys():
+        flats = update_site(gsheet, site, sites[site])
+        
+        if not flats.empty:
+            # Add divider between sites
+            if email_body != '':
+                email_body += SITE_DIVIDER
 
-    if not zoopla_flats.empty:
-        if email_body != '':
-            email_body += SITE_DIVIDER
+            email_body += f'{flats.shape[0]} New flat(s) on {site}' + FLAT_DIVIDER
+            email_body += FLAT_DIVIDER.join(map(listing_to_email, flats.values.tolist()))                        
 
-        email_body += f'{zoopla_flats.shape[0]} New flat(s) on Zoopla' + FLAT_DIVIDER
-        email_body += FLAT_DIVIDER.join(map(listing_to_email, zoopla_flats.values.tolist()))
-
-    if not onthemarket_flats.empty:
-        if email_body != '':
-            email_body += SITE_DIVIDER
-
-        email_body += f'{onthemarket_flats.shape[0]} New flat(s) on OnTheMarket' + FLAT_DIVIDER
-        email_body += FLAT_DIVIDER.join(map(listing_to_email, onthemarket_flats.values.tolist()))
-
+    # Send email if any new flat is found
     if email_body != '':
         email = EmailClient(email_config)
         email.send(email_body)
