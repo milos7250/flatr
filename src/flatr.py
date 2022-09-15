@@ -21,39 +21,49 @@ SITE_CLASSES = {
     'OnTheMarket': OnTheMarket
 }
 
+def now():
+    return datetime.now().strftime('%Y-%m-%d %H:%M')
+
 def listing_to_email(listing) -> str:
     title, price, available, _, link, *_ = listing
     return f'{title}\n{available}\nPrice: {price}\n{link}'
 
 def update_site(gsheet, site, link) -> DataFrame:
 
-    # Accessing current flats for site
-    worksheet = gsheet.worksheet(site)
-    flats = DataFrame(worksheet.get_all_records())
-    headers = [flats.columns.values.tolist()]
-    current_entries = flats.values.tolist()
+    try:
 
-    # Getting listings from site
-    listings = SITE_CLASSES[site](link).get_listings()
-    new_flats = DataFrame(listings, columns=COLUMNS)
-    new_flats.insert(3, 'Added', datetime.now().strftime('%Y-%m-%d %H:%M'))
-    new_flats['Notes'] = ''
+        # Accessing current flats for site
+        worksheet = gsheet.worksheet(site)
+        flats = DataFrame(worksheet.get_all_records())
+        headers = [flats.columns.values.tolist()]
+        current_entries = flats.values.tolist()
 
-    # Sheet for site is empty -> first flats in sheet
-    if flats.empty:
-        headers = [new_flats.columns.values.tolist()]
-        worksheet.update(headers + new_flats.values.tolist())
+        # Getting listings from site
+        listings = SITE_CLASSES[site](link).get_listings()
+        new_flats = DataFrame(listings, columns=COLUMNS)
+        new_flats.insert(3, 'Added', now())
+        new_flats['Notes'] = ''
 
-    else:
-        links = set(flats['Link'].values)
-        new_flats = new_flats.loc[~new_flats['Link'].isin(links)]
-        worksheet.update(headers + current_entries + new_flats.values.tolist())
+        # Sheet for site is empty -> first flats in sheet
+        if flats.empty:
+            headers = [new_flats.columns.values.tolist()]
+            worksheet.update(headers + new_flats.values.tolist())
 
-    return new_flats
+        else:
+            links = set(flats['Link'].values)
+            new_flats = new_flats.loc[~new_flats['Link'].isin(links)]
+            worksheet.update(headers + current_entries + new_flats.values.tolist())
+
+        return new_flats
+
+    except Exception as e:
+        print(f'[ {now()} ]: Update to {site} failed due to exception!\n\n{e}')
+        
+        return DataFrame()
 
 def main():
     if not os.path.exists(CONFIG_PATH):
-        print(f'Config file not found at {CONFIG_PATH}')
+        print(f'[ {now()} ]: Config file not found at {CONFIG_PATH}')
         exit(1)
 
     with open(CONFIG_PATH, 'r') as config_json:
@@ -69,7 +79,7 @@ def main():
         exit(1)
 
     # Accessing the Google Sheets
-    google_credentials = config['google_credentials']
+    google_credentials = os.path.join(SRC_DIR, config['google_credentials'])
     gc = gspread.service_account(filename=google_credentials)
     gsheet = gc.open(spreadsheet)
 
@@ -97,5 +107,4 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as e:
-        time = datetime.now().strftime('%Y-%m-%d %H:%M')
-        print(f'{time}: The following errors occured:\n\n{e}')
+        print(f'[ {now()} ]: The following errors occured:\n\n{e}')

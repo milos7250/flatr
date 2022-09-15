@@ -10,6 +10,7 @@ class Gumtree:
         self.soup = BeautifulSoup(self.response.text, 'html.parser')
 
     def parse_listing(self, listing):
+        
         title = self.get_title(listing)
         link = self.get_link(listing)
         price = self.get_price(listing)
