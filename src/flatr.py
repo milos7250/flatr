@@ -14,6 +14,8 @@ CONFIG_PATH = os.path.join(SRC_DIR, 'config.json')
 COLUMNS = ['Title', 'Price', 'Available', 'Link']
 FLAT_DIVIDER = '\n\n' + '-' * 50 + '\n\n'
 SITE_DIVIDER = '\n\n' + '=' * 50 + '\n\n'
+ROWS = 1000
+COLS = 6
 
 SITE_CLASSES = {
     'Gumtree': Gumtree,
@@ -21,19 +23,26 @@ SITE_CLASSES = {
     'OnTheMarket': OnTheMarket
 }
 
-def now():
+def now() -> str:
     return datetime.now().strftime('%Y-%m-%d %H:%M')
 
 def listing_to_email(listing) -> str:
     title, price, available, _, link, *_ = listing
     return f'{title}\n{available}\nPrice: {price}\n{link}'
 
+def open_worksheet(gsheet, site):
+    try:
+        return gsheet.worksheet(site)
+
+    except gspread.WorksheetNotFound:
+        return gsheet.add_worksheet(title=site, rows=ROWS, cols=COLS)
+
 def update_site(gsheet, site, link) -> DataFrame:
 
     try:
 
         # Accessing current flats for site
-        worksheet = gsheet.worksheet(site)
+        worksheet = open_worksheet(gsheet, site)
         flats = DataFrame(worksheet.get_all_records())
         headers = [flats.columns.values.tolist()]
         current_entries = flats.values.tolist()
@@ -61,7 +70,7 @@ def update_site(gsheet, site, link) -> DataFrame:
         
         return DataFrame()
 
-def main():
+def main() -> None:
     if not os.path.exists(CONFIG_PATH):
         print(f'[ {now()} ]: Config file not found at {CONFIG_PATH}')
         exit(1)
