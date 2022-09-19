@@ -3,6 +3,7 @@ from gumtree import Gumtree
 from onthemarket import OnTheMarket
 from zoopla import Zoopla
 from rightmove import Rightmove
+from spareroom import Spareroom
 import os
 import json
 from sys import exit
@@ -22,7 +23,8 @@ SITE_CLASSES = {
     'Gumtree': Gumtree,
     'Zoopla': Zoopla,
     'OnTheMarket': OnTheMarket,
-    'Rightmove': Rightmove
+    'Rightmove': Rightmove,
+    'Spareroom': Spareroom
 }
 
 def now() -> str:
@@ -68,7 +70,7 @@ def update_site(gsheet, site, link) -> DataFrame:
         return new_flats
 
     except Exception as e:
-        print(f'[ {now()} ]: Update to {site} failed due to exception!\n\n{e}')
+        print(f'[ {now()} ]: Update to {site} failed due to exception!\n{e}')
         
         return DataFrame()
 
@@ -118,4 +120,4 @@ if __name__ == '__main__':
     try:
         main()
     except Exception as e:
-        print(f'[ {now()} ]: The following errors occured:\n\n{e}')
+        print(f'[ {now()} ]: The following errors occured:\n{e}')
