@@ -2,6 +2,7 @@ from email_client import EmailClient
 from gumtree import Gumtree
 from onthemarket import OnTheMarket
 from zoopla import Zoopla
+from rightmove import Rightmove
 import os
 import json
 from sys import exit
@@ -20,7 +21,8 @@ COLS = 6
 SITE_CLASSES = {
     'Gumtree': Gumtree,
     'Zoopla': Zoopla,
-    'OnTheMarket': OnTheMarket
+    'OnTheMarket': OnTheMarket,
+    'Rightmove': Rightmove
 }
 
 def now() -> str:
