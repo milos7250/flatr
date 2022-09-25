@@ -3,3 +3,4 @@ src/__pycache__/
 src/google_credentials.json
 .ipynb_checkpoints/
 *.ipynb
+src/cron.log
