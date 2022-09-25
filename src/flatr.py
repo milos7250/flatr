@@ -4,6 +4,7 @@ from onthemarket import OnTheMarket
 from zoopla import Zoopla
 from rightmove import Rightmove
 from spareroom import Spareroom
+from zoneletting import ZoneLetting
 import os
 import json
 from sys import exit
@@ -24,7 +25,8 @@ SITE_CLASSES = {
     'Zoopla': Zoopla,
     'OnTheMarket': OnTheMarket,
     'Rightmove': Rightmove,
-    'Spareroom': Spareroom
+    'Spareroom': Spareroom,
+    'ZoneLetting': ZoneLetting
 }
 
 def now() -> str:
