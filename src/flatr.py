@@ -5,6 +5,7 @@ from zoopla import Zoopla
 from rightmove import Rightmove
 from spareroom import Spareroom
 from zoneletting import ZoneLetting
+from grantproperty import GrantProperty
 import os
 import json
 from sys import exit
@@ -26,7 +27,8 @@ SITE_CLASSES = {
     'OnTheMarket': OnTheMarket,
     'Rightmove': Rightmove,
     'Spareroom': Spareroom,
-    'ZoneLetting': ZoneLetting
+    'ZoneLetting': ZoneLetting,
+    'GrantProperty': GrantProperty
 }
 
 def now() -> str:
