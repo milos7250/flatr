@@ -14,7 +14,7 @@ from pandas import DataFrame
 from datetime import datetime
 
 SRC_DIR = os.path.dirname(__file__)
-CONFIG_PATH = os.path.join(SRC_DIR, 'config.json')
+CONFIG_PATH = os.path.join(SRC_DIR, '../data/config.json')
 COLUMNS = ['Title', 'Price', 'Available', 'Link']
 FLAT_DIVIDER = '\n\n' + '-' * 50 + '\n\n'
 SITE_DIVIDER = '\n\n' + '=' * 50 + '\n\n'

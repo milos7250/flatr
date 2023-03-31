@@ -1,6 +1,14 @@
-src/config.json
-src/__pycache__/
-src/google_credentials.json
-.ipynb_checkpoints/
+# Python cache and checkpoints
+*.ipynb_checkpoints
+*__pycache__
+
+# Exclude testing jupyter notebooks
+notebooks
 *.ipynb
+
+# Exclude .json files, except the configuration template
+*.json
+!data/config_temp.json
+
+# Exclude cron scheduling log
 src/cron.log
