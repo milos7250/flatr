@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import re
 
 class ZoneLetting:
+    PREPEND = 'https://zonegroup.co.uk'
     MISSING = 'Missing'
 
     def __init__(self, link):
@@ -14,43 +15,47 @@ class ZoneLetting:
         title = self.get_title(listing)
         link = self.get_link(listing)
         price = self.get_price(listing)
-        available = self.get_availability(listing)
+        available = self.get_availability(link)
 
         return (title, price, available, link)
 
     def get_title(self, listing):
         try:
-            bedrooms = listing.select('div[class="col-xs-2 bedrooms"]')[0].string
-            location = listing.select('div[class="col-sm-7 no-space"]')[0].h2.a.string
-            return f'{bedrooms} bedroom{"" if bedrooms == "1" else "s"} flat at {location}'
-
+            bedrooms = listing.select('div[class="zText semiSmallText semiBoldWeight propertyMetaItem"]')[-1].contents[-1]
+            location = listing.select('p', {'class': 'proAddress'})[0].contents[-1]
+            return f'{bedrooms} flat at {location}'
+        
         except:
             return ZoneLetting.MISSING
 
     def get_link(self, listing):
         try:
-            raw_link = listing.select('div[class="col-sm-5 listimage res"]')[0].a['href']
-            return raw_link[12:]
+            raw_link = listing.a['href']
+            return ZoneLetting.PREPEND + raw_link
 
         except:
             return ZoneLetting.MISSING
 
     def get_price(self, listing):
         try:
-            return listing.select('div[class="col-xs-6 price"]')[0].string.strip()
+            price_str = listing.h3.string
+            start_idx = price_str.find('£')
+            return price_str[start_idx:]
+        
         except:
             return ZoneLetting.MISSING
 
-    def get_availability(self, listing):
+    def get_availability(self, link):
             try:
-                available = listing.select('div[class="col-xs-4 available"]')[0].text.strip()
-                return re.sub('  ', ' ', available)
+                response = requests.get(link)
+                soup = BeautifulSoup(response.text, 'html.parser')
+                return soup.select('div[class="zText semiMediumText semiBoldWeight metaDataSectionItem"]')[0].span.string
             
             except:
                 return ZoneLetting.MISSING
 
     def get_listings(self):
-        raw_listings = self.soup.find_all('div', {'class': 'row list'})
+        raw_listings = self.soup.find_all('div', {'class': 'propertyItem'})
         listings = []
         for listing in raw_listings:
             listings.append(self.parse_listing(listing))
