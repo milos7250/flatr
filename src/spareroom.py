@@ -4,10 +4,14 @@ import re
 
 class Spareroom:
     PREPEND = 'spareroom.co.uk'
+    HEADERS = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36',
+        'accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    }
     MISSING = 'Missing'
 
     def __init__(self, link):
-        self.response = requests.get(link)
+        self.response = requests.get(link, headers=Spareroom.HEADERS)
         self.soup = BeautifulSoup(self.response.text, 'html.parser')
 
     def parse_listing(self, listing):
