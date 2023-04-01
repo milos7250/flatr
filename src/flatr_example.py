@@ -1,14 +1,8 @@
-from email_client import EmailClient
-from gumtree import Gumtree
-from onthemarket import OnTheMarket
-from zoopla import Zoopla
-from rightmove import Rightmove
-from spareroom import Spareroom
-from zoneletting import ZoneLetting
-from grantproperty import GrantProperty
+import sys
+from flatr.utils import EmailClient
+from flatr import sites
 import os
 import json
-from sys import exit
 import gspread
 from pandas import DataFrame
 from datetime import datetime
@@ -22,13 +16,13 @@ ROWS = 1000
 COLS = 6
 
 SITE_CLASSES = {
-    'Gumtree': Gumtree,
-    'Zoopla': Zoopla,
-    'OnTheMarket': OnTheMarket,
-    'Rightmove': Rightmove,
-    'Spareroom': Spareroom,
-    'ZoneLetting': ZoneLetting,
-    'GrantProperty': GrantProperty
+    'Gumtree': sites.Gumtree,
+    'Zoopla': sites.Zoopla,
+    'OnTheMarket': sites.OnTheMarket,
+    'Rightmove': sites.Rightmove,
+    'Spareroom': sites.Spareroom,
+    'ZoneLetting': sites.ZoneLetting,
+    'GrantProperty': sites.GrantProperty
 }
 
 def now() -> str:
@@ -81,7 +75,7 @@ def update_site(gsheet, site, link) -> DataFrame:
 def main() -> None:
     if not os.path.exists(CONFIG_PATH):
         print(f'[ {now()} ]: Config file not found at {CONFIG_PATH}')
-        exit(1)
+        sys.exit(1)
 
     with open(CONFIG_PATH, 'r') as config_json:
         config = json.load(config_json)
@@ -93,7 +87,7 @@ def main() -> None:
 
     except KeyError as e:
         print(e)
-        exit(1)
+        sys.exit(1)
 
     # Accessing the Google Sheets
     google_credentials = os.path.join(SRC_DIR, config['google_credentials'])
@@ -118,7 +112,7 @@ def main() -> None:
         email = EmailClient(email_config)
         email.send(email_body)
 
-    exit(0)
+    sys.exit(0)
 
 if __name__ == '__main__':
     try:

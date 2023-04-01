@@ -2,6 +2,9 @@
 *.ipynb_checkpoints
 *__pycache__
 
+# Exclude flatr egg info
+flatr.egg-info
+
 # Exclude testing jupyter notebooks
 notebooks
 *.ipynb
