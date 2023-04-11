@@ -1,27 +1,15 @@
-import requests
-from bs4 import BeautifulSoup
 import re
+from .site import Site
 
-class Zoopla:
+class Zoopla(Site):
     PREPEND = 'zoopla.co.uk/'
     HEADERS = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36',
         'accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     }
-    MISSING = 'Missing'
 
     def __init__(self, link):
-        self.response = requests.get(link, headers=Zoopla.HEADERS)
-        self.soup = BeautifulSoup(self.response.text, 'html.parser')
-
-    def parse_listing(self, listing):
-        
-        title = self.get_title(listing)
-        link = self.get_link(listing)
-        price = self.get_price(listing)
-        available = self.get_availability(listing)
-            
-        return (title, price, available, link)
+        super().__init__(link, headers=Zoopla.HEADERS)
 
     def get_title(self, listing):
         try:
@@ -30,7 +18,7 @@ class Zoopla:
             return f'{raw_title} at {location}'
 
         except Exception:
-            return Zoopla.MISSING
+            return self.MISSING
 
     def get_link(self, listing):
         try:
@@ -38,21 +26,21 @@ class Zoopla:
             return Zoopla.PREPEND + re.sub(r'\?search_identifier=[a-f0-9]*', '', raw_url)
         
         except Exception:
-            return Zoopla.MISSING
+            return self.MISSING
 
     def get_price(self, listing):
         try:
             return listing.select('div[data-testid="listing-price"]')[0].p.string
         
         except Exception:
-            return Zoopla.MISSING
+            return self.MISSING
 
     def get_availability(self, listing):
         try:
             return listing.find_all('span', {'data-testid':'available-from-date'})[0].string[1:]
         
         except Exception:
-            return Zoopla.MISSING
+            return self.MISSING
 
     def get_listings(self):
         raw_listings = self.soup.find_all('div', {'data-testid': re.compile(r'search-result_listing_*')})
@@ -61,3 +49,4 @@ class Zoopla:
             listings.append(self.parse_listing(listing))
 
         return listings[::-1]
+    

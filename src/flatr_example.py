@@ -42,7 +42,6 @@ def open_worksheet(gsheet, site):
 def update_site(gsheet, site, link) -> DataFrame:
 
     try:
-
         # Accessing current flats for site
         worksheet = open_worksheet(gsheet, site)
         flats = DataFrame(worksheet.get_all_records())
@@ -51,6 +50,10 @@ def update_site(gsheet, site, link) -> DataFrame:
 
         # Getting listings from site
         listings = SITE_CLASSES[site](link).get_listings()
+
+        # Cast Listings to dictionaries
+        listings = list(map(dict, listings))
+
         new_flats = DataFrame(listings, columns=COLUMNS)
         new_flats.insert(3, 'Added', now())
         new_flats['Notes'] = ''
@@ -105,7 +108,7 @@ def main() -> None:
                 email_body += SITE_DIVIDER
 
             email_body += f'{flats.shape[0]} New flat(s) on {site}' + FLAT_DIVIDER
-            email_body += FLAT_DIVIDER.join(map(listing_to_email, flats.values.tolist()))                        
+            email_body += FLAT_DIVIDER.join(map(listing_to_email, flats.values.tolist()))                     
 
     # Send email if any new flat is found
     if email_body != '':
