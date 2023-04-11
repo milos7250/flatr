@@ -1,23 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
-import re
+from .site import Site
 
-class ZoneLetting:
+class ZoneLetting(Site):
     PREPEND = 'https://zonegroup.co.uk'
-    MISSING = 'Missing'
 
     def __init__(self, link):
-        self.response = requests.get(link)
-        self.soup = BeautifulSoup(self.response.text, 'html.parser')
-
-    def parse_listing(self, listing):
-
-        title = self.get_title(listing)
-        link = self.get_link(listing)
-        price = self.get_price(listing)
-        available = self.get_availability(link)
-
-        return (title, price, available, link)
+        super().__init__(link)
 
     def get_title(self, listing):
         try:
@@ -26,7 +15,7 @@ class ZoneLetting:
             return f'{bedrooms} flat at {location}'
         
         except:
-            return ZoneLetting.MISSING
+            return self.MISSING
 
     def get_link(self, listing):
         try:
@@ -34,7 +23,7 @@ class ZoneLetting:
             return ZoneLetting.PREPEND + raw_link
 
         except:
-            return ZoneLetting.MISSING
+            return self.MISSING
 
     def get_price(self, listing):
         try:
@@ -43,7 +32,7 @@ class ZoneLetting:
             return price_str[start_idx:]
         
         except:
-            return ZoneLetting.MISSING
+            return self.MISSING
 
     def get_availability(self, link):
             try:
@@ -52,12 +41,8 @@ class ZoneLetting:
                 return soup.select('div[class="zText semiMediumText semiBoldWeight metaDataSectionItem"]')[0].span.string
             
             except:
-                return ZoneLetting.MISSING
+                return self.MISSING
 
-    def get_listings(self):
-        raw_listings = self.soup.find_all('div', {'class': 'propertyItem'})
-        listings = []
-        for listing in raw_listings:
-            listings.append(self.parse_listing(listing))
-
-        return listings[::-1]
+    def get_raw_listings(self):
+        return self.soup.find_all('div', {'class': 'propertyItem'})
+    
