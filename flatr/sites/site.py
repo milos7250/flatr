@@ -12,7 +12,6 @@ class Site(ABC):
         self.soup = BeautifulSoup(self.response.text, 'html.parser')
 
     def parse_listing(self, listing) -> Listing:
-
         title = self.get_title(listing)
         link = self.get_link(listing)
         price = self.get_price(listing)
@@ -20,6 +19,14 @@ class Site(ABC):
 
         return Listing(title, link, price, available)
     
+    def get_listings(self):
+        raw_listings = self.get_raw_listings()
+        listings = []
+        for listing in raw_listings:
+            listings.append(self.parse_listing(listing))
+
+        return listings[::-1]
+
     @abstractmethod
     def get_title(self, listing) -> str:
         pass
@@ -37,5 +44,5 @@ class Site(ABC):
         pass
     
     @abstractmethod
-    def get_listings(self) -> List[Listing]:
+    def get_raw_listings(self) -> List[Listing]:
         pass

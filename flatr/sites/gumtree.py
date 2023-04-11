@@ -44,11 +44,6 @@ class Gumtree(Site):
 
         return self.MISSING
 
-    def get_listings(self):
-        raw_listings = self.soup.find_all('li', {'class':'natural'})
-        listings = []
-        for listing in raw_listings:
-            listings.append(self.parse_listing(listing))
-
-        return listings[::-1]
+    def get_raw_listings(self):
+        return self.soup.find_all('li', {'class':'natural'})
     

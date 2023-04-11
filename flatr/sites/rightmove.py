@@ -31,11 +31,6 @@ class Rightmove(Site):
     def get_availability(self, listing):
             return self.MISSING
 
-    def get_listings(self):
-        raw_listings = self.soup.find_all('div', {'id': re.compile(r'property-[0-9]{9}')})
-        listings = []
-        for listing in raw_listings:
-            listings.append(self.parse_listing(listing))
-
-        return listings[::-1]
+    def get_raw_listings(self):
+        return self.soup.find_all('div', {'id': re.compile(r'property-[0-9]{9}')})
     

@@ -1,7 +1,6 @@
 from .site import Site
 
 class OnTheMarket(Site):
-
     PREPEND = 'onthemarket.co.uk'
     HEADERS = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36',
@@ -37,11 +36,6 @@ class OnTheMarket(Site):
     def get_availability(self, listing):
             return self.MISSING
 
-    def get_listings(self):
-        raw_listings = self.soup.find_all('li', {'class': 'otm-PropertyCard'})
-        listings = []
-        for listing in raw_listings:
-            listings.append(self.parse_listing(listing))
-
-        return listings[::-1]
+    def get_raw_listings(self):
+        return self.soup.find_all('li', {'class': 'otm-PropertyCard'})
     

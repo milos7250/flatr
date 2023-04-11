@@ -42,11 +42,6 @@ class Zoopla(Site):
         except Exception:
             return self.MISSING
 
-    def get_listings(self):
-        raw_listings = self.soup.find_all('div', {'data-testid': re.compile(r'search-result_listing_*')})
-        listings = []
-        for listing in raw_listings:
-            listings.append(self.parse_listing(listing))
-
-        return listings[::-1]
+    def get_raw_listings(self):
+        return self.soup.find_all('div', {'data-testid': re.compile(r'search-result_listing_*')})
     
