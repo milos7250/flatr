@@ -1,5 +1,5 @@
 {
-    "google_credentials": "relative/path/from/src/to/google_credentials.json",
+    "google_credentials": "relative/path/from/example/to/google_credentials.json",
     "spreadsheet": "spreadsheet title",
     "email": {
         "user": "user gmail email address used for sending email",
