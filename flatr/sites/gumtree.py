@@ -1,4 +1,5 @@
 from .site import Site
+from bs4.element import Tag, ResultSet
 
 class Gumtree(Site):
     PREPEND = 'gumtree.co.uk'
@@ -7,31 +8,31 @@ class Gumtree(Site):
         'accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     }
 
-    def __init__(self, link):
+    def __init__(self, link:str):
         super().__init__(link, headers=Gumtree.HEADERS)
 
-    def get_title(self, listing):
+    def get_title(self, listing:Tag) -> str:
         try:
             return listing.select('.listing-title')[0].string.strip('\n')
         
         except Exception:
             return self.MISSING
 
-    def get_link(self, listing):
+    def get_link(self, listing:Tag) -> str:
         try:
             return Gumtree.PREPEND + listing.select('.listing-link')[0]['href']
 
         except Exception:
             return self.MISSING
 
-    def get_price(self, listing):
+    def get_price(self, listing:Tag) -> str:
         try:
             return listing.select('.listing-price')[0].strong.string
 
         except Exception:
             return self.MISSING
 
-    def get_availability(self, listing):
+    def get_availability(self, listing:Tag) -> str:
         attributes = dict()
 
         for li in listing.select('.listing-attributes')[0].findAll('li'):
@@ -44,6 +45,6 @@ class Gumtree(Site):
 
         return self.MISSING
 
-    def get_raw_listings(self):
+    def get_raw_listings(self) -> ResultSet:
         return self.soup.find_all('li', {'class':'natural'})
     

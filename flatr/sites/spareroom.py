@@ -1,5 +1,6 @@
 import re
 from .site import Site
+from bs4.element import Tag, ResultSet
 
 class Spareroom(Site):
     PREPEND = 'spareroom.co.uk'
@@ -8,17 +9,17 @@ class Spareroom(Site):
         'accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     }
 
-    def __init__(self, link):
+    def __init__(self, link:str):
         super().__init__(link, headers=Spareroom.HEADERS)
 
-    def get_title(self, listing):
+    def get_title(self, listing:Tag) -> str:
         try:
             return listing.h2.string.strip()
 
         except:
             return Spareroom.MISSING
 
-    def get_link(self, listing):
+    def get_link(self, listing:Tag) -> str:
         try:
             raw_link = listing.select('a[class="advertDescription"]')[0]['href']
             return Spareroom.PREPEND + re.sub(r'&search_id=.*', '', raw_link)
@@ -26,19 +27,19 @@ class Spareroom(Site):
         except:
             return Spareroom.MISSING
 
-    def get_price(self, listing):
+    def get_price(self, listing:Tag) -> str:
         try:
             return listing.header.a.strong.get_text()
         except:
             return Spareroom.MISSING
 
-    def get_availability(self, listing):
+    def get_availability(self, listing:Tag) -> str:
             try:
                 return listing.select('div.listing-results-content.desktop')[0].strong.get_text()
 
             except:
                 return Spareroom.MISSING
 
-    def get_raw_listings(self):
+    def get_raw_listings(self) -> ResultSet:
         return self.soup.find_all('li', {'class': 'listing-result'})
     

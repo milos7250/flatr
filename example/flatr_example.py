@@ -4,8 +4,10 @@ from flatr import sites
 import os
 import json
 import gspread
+from gspread.spreadsheet import Spreadsheet
 from pandas import DataFrame
 from datetime import datetime
+from typing import List
 
 SRC_DIR = os.path.dirname(__file__)
 CONFIG_PATH = os.path.join(SRC_DIR, './config.json')
@@ -28,18 +30,18 @@ SITE_CLASSES = {
 def now() -> str:
     return datetime.now().strftime('%Y-%m-%d %H:%M')
 
-def listing_to_email(listing) -> str:
+def listing_to_email(listing:List[str]) -> str:
     title, price, available, _, link, *_ = listing
     return f'{title}\n{available}\nPrice: {price}\n{link}'
 
-def open_worksheet(gsheet, site):
+def open_worksheet(gsheet:Spreadsheet, site:str):
     try:
         return gsheet.worksheet(site)
 
     except gspread.WorksheetNotFound:
         return gsheet.add_worksheet(title=site, rows=ROWS, cols=COLS)
 
-def update_site(gsheet, site, link) -> DataFrame:
+def update_site(gsheet:Spreadsheet, site:str, link:str) -> DataFrame:
 
     try:
         # Accessing current flats for site

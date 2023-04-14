@@ -2,9 +2,10 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from sys import exit
+from typing import Dict
 
 class EmailClient:
-    def __init__(self, config):
+    def __init__(self, config:Dict[str, str]):
         self.config = config
         
         try:
@@ -17,7 +18,7 @@ class EmailClient:
             print(f'Invalid configuration key {e}. Check the "config_temp.json" file for proper keys.')
             exit(1)
 
-    def send(self, email_body):
+    def send(self, email_body:str) -> None:
         try:
             session = smtplib.SMTP('smtp.gmail.com', 587)
             session.starttls()

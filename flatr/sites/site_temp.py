@@ -1,4 +1,5 @@
 from .site import Site
+from bs4.element import Tag, ResultSet
 
 class ClassName(Site):
     PREPEND = 'prepend for website'
@@ -7,10 +8,10 @@ class ClassName(Site):
         'accept' : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
     }
 
-    def __init__(self, link):
+    def __init__(self, link:str):
         super().__init__(link, headers=ClassName.HEADERS)
 
-    def get_title(self, listing):
+    def get_title(self, listing:Tag) -> str:
         try:
             raw_title = listing.select('CSS selector')[0].a.string
             location = listing.select('CSS selector')[0].a.string
@@ -19,7 +20,7 @@ class ClassName(Site):
         except:
             return self.MISSING
 
-    def get_link(self, listing):
+    def get_link(self, listing:Tag) -> str:
         try:
             raw_link = listing.select('CSS selector')[0].a['href']
             return ClassName.PREPEND + raw_link
@@ -27,15 +28,18 @@ class ClassName(Site):
         except:
             return self.MISSING
 
-    def get_price(self, listing):
+    def get_price(self, listing:Tag) -> str:
         try:
             return listing.select('CSS selector')[0].string
         except:
             return self.MISSING
 
-    def get_availability(self, listing):
+    def get_availability(self, listing:Tag) -> str:
+        try:
+            return listing.select('CSS selector')[0].string
+        except:
             return self.MISSING
 
-    def get_raw_listings(self):
+    def get_raw_listings(self) -> ResultSet:
         return self.soup.find_all('css tag', {'class': 'listing class'})
     
