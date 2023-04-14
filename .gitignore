@@ -15,3 +15,5 @@ notebooks
 
 # Exclude cron scheduling log
 src/cron.log
+
+*.coverage
