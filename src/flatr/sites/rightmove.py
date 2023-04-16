@@ -20,14 +20,14 @@ class Rightmove(Site):
     def get_link(self, listing: Tag) -> str:
         try:
             raw_link = listing.select('a.propertyCard-link')[0]['href']
-            return Rightmove.PREPEND + re.sub(r'#/\?channel=RES_LET', '', raw_link)
+            return Rightmove.PREPEND + str(re.sub(r'#/\?channel=RES_LET', '', raw_link))
 
         except Exception:
             return self.MISSING
 
     def get_price(self, listing: Tag) -> str:
         try:
-            return listing.select('span[class="propertyCard-priceValue"]')[0].string
+            return str(listing.select('span[class="propertyCard-priceValue"]')[0].string)
         except Exception:
             return self.MISSING
 

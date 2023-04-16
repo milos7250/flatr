@@ -15,7 +15,7 @@ class Spareroom(Site):
 
     def get_title(self, listing: Tag) -> str:
         try:
-            return listing.h2.string.strip()
+            return str(listing.h2.string).strip()
 
         except Exception:
             return Spareroom.MISSING
@@ -23,20 +23,20 @@ class Spareroom(Site):
     def get_link(self, listing: Tag) -> str:
         try:
             raw_link = listing.select('a[class="advertDescription"]')[0]['href']
-            return Spareroom.PREPEND + re.sub(r'&search_id=.*', '', raw_link)
+            return Spareroom.PREPEND + str(re.sub(r'&search_id=.*', '', raw_link))
 
         except Exception:
             return Spareroom.MISSING
 
     def get_price(self, listing: Tag) -> str:
         try:
-            return listing.header.a.strong.get_text()
+            return str(listing.header.a.strong.get_text())
         except Exception:
             return Spareroom.MISSING
 
     def get_availability(self, listing: Tag) -> str:
         try:
-            return listing.select('div.listing-results-content.desktop')[0].strong.get_text()
+            return str(listing.select('div.listing-results-content.desktop')[0].strong.get_text())
 
         except Exception:
             return Spareroom.MISSING

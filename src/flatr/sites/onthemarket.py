@@ -23,7 +23,7 @@ class OnTheMarket(Site):
 
     def get_link(self, listing: Tag) -> str:
         try:
-            raw_link = listing.select('div[class="otm-PropertyCardMedia"]')[0].a['href']
+            raw_link = str(listing.select('div[class="otm-PropertyCardMedia"]')[0].a['href'])
             return OnTheMarket.PREPEND + raw_link
 
         except Exception:
@@ -31,7 +31,7 @@ class OnTheMarket(Site):
 
     def get_price(self, listing: Tag) -> str:
         try:
-            return listing.select('div[class="otm-Price"]')[0].string
+            return str(listing.select('div[class="otm-Price"]')[0].string)
         except Exception:
             return self.MISSING
 

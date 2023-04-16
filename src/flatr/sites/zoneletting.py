@@ -21,7 +21,7 @@ class ZoneLetting(Site):
 
     def get_link(self, listing: Tag) -> str:
         try:
-            raw_link = listing.a['href']
+            raw_link = str(listing.a['href'])
             return ZoneLetting.PREPEND + raw_link
 
         except Exception:
@@ -29,7 +29,7 @@ class ZoneLetting(Site):
 
     def get_price(self, listing: Tag) -> str:
         try:
-            price_str = listing.h3.string
+            price_str = str(listing.h3.string)
             start_idx = price_str.find('£')
             return price_str[start_idx:]
 
@@ -40,7 +40,7 @@ class ZoneLetting(Site):
         try:
             response = requests.get(self.link)
             soup = BeautifulSoup(response.text, 'html.parser')
-            return soup.select('div[class="zText semiMediumText semiBoldWeight metaDataSectionItem"]')[0].span.string
+            return str(soup.select('div[class="zText semiMediumText semiBoldWeight metaDataSectionItem"]')[0].span.string)
 
         except Exception:
             return self.MISSING

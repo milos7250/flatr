@@ -14,21 +14,21 @@ class Gumtree(Site):
 
     def get_title(self, listing: Tag) -> str:
         try:
-            return listing.select('.listing-title')[0].string.strip('\n')
+            return str(listing.select('.listing-title')[0].string).strip('\n')
 
         except Exception:
             return self.MISSING
 
     def get_link(self, listing: Tag) -> str:
         try:
-            return Gumtree.PREPEND + listing.select('.listing-link')[0]['href']
+            return Gumtree.PREPEND + str(listing.select('.listing-link')[0]['href'])
 
         except Exception:
             return self.MISSING
 
     def get_price(self, listing: Tag) -> str:
         try:
-            return listing.select('.listing-price')[0].strong.string
+            return str(listing.select('.listing-price')[0].strong.string)
 
         except Exception:
             return self.MISSING
@@ -37,12 +37,12 @@ class Gumtree(Site):
         attributes = dict()
 
         for li in listing.select('.listing-attributes')[0].findAll('li'):
-            list(map(lambda x: x.string, li.findAll('span')))
+            list(map(lambda x: str(x.string), li.findAll('span')))
             key, value = li.findAll('span')
             attributes[key.string] = value.string
 
         if 'Date available' in attributes:
-            return attributes['Date available']
+            return str(attributes['Date available'])
 
         return self.MISSING
 

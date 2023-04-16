@@ -25,21 +25,21 @@ class Zoopla(Site):
     def get_link(self, listing: Tag) -> str:
         try:
             raw_url = listing.select('a[data-testid="listing-details-link"]')[0]['href']
-            return Zoopla.PREPEND + re.sub(r'\?search_identifier=[a-f0-9]*', '', raw_url)
+            return Zoopla.PREPEND + str(re.sub(r'\?search_identifier=[a-f0-9]*', '', raw_url))
 
         except Exception:
             return self.MISSING
 
     def get_price(self, listing: Tag) -> str:
         try:
-            return listing.select('div[data-testid="listing-price"]')[0].p.string
+            return str(listing.select('div[data-testid="listing-price"]')[0].p.string)
 
         except Exception:
             return self.MISSING
 
     def get_availability(self, listing: Tag) -> str:
         try:
-            return listing.find_all('span', {'data-testid': 'available-from-date'})[0].string[1:]
+            return str(listing.find_all('span', {'data-testid': 'available-from-date'})[0].string)[1:]
 
         except Exception:
             return self.MISSING

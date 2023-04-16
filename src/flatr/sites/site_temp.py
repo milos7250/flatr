@@ -23,7 +23,7 @@ class ClassName(Site):
 
     def get_link(self, listing: Tag) -> str:
         try:
-            raw_link = listing.select('CSS selector')[0].a['href']
+            raw_link = str(listing.select('CSS selector')[0].a['href'])
             return ClassName.PREPEND + raw_link
 
         except Exception:
@@ -31,13 +31,13 @@ class ClassName(Site):
 
     def get_price(self, listing: Tag) -> str:
         try:
-            return listing.select('CSS selector')[0].string
+            return str(listing.select('CSS selector')[0].string)
         except Exception:
             return self.MISSING
 
     def get_availability(self, listing: Tag) -> str:
         try:
-            return listing.select('CSS selector')[0].string
+            return str(listing.select('CSS selector')[0].string)
         except Exception:
             return self.MISSING
 

@@ -22,14 +22,14 @@ class GrantProperty(Site):
 
     def get_link(self, listing: Tag) -> str:
         try:
-            return listing.a['href'][12:]
+            return str(listing.a['href'])[12:]
 
         except Exception:
             return self.MISSING
 
     def get_price(self, listing: Tag) -> str:
         try:
-            return listing.select('div[class="overview-price"]')[0].text.strip()
+            return str(listing.select('div[class="overview-price"]')[0].text).strip()
         except Exception:
             return self.MISSING
 
