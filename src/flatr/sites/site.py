@@ -16,11 +16,11 @@ class Site(ABC):
 
     def parse_listing(self, listing: Tag) -> Listing:
         title = self.get_title(listing)
-        link = self.get_link(listing)
         price = self.get_price(listing)
         available = self.get_availability(listing)
+        link = self.get_link(listing)
 
-        return Listing(title, link, price, available)
+        return Listing(title, price, available, link)
 
     def get_listings(self) -> List[Listing]:
         raw_listings = self.get_raw_listings()
