@@ -1,4 +1,4 @@
-from .site import Site
+from flatr.site import Site
 from bs4.element import Tag, ResultSet
 
 
