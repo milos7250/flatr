@@ -27,21 +27,25 @@ SITE_CLASSES = {
     'GrantProperty': sites.GrantProperty
 }
 
+
 def now() -> str:
     return datetime.now().strftime('%Y-%m-%d %H:%M')
 
-def listing_to_email(listing:List[str]) -> str:
+
+def listing_to_email(listing: List[str]) -> str:
     title, price, available, _, link, *_ = listing
     return f'{title}\n{available}\nPrice: {price}\n{link}'
 
-def open_worksheet(gsheet:Spreadsheet, site:str):
+
+def open_worksheet(gsheet: Spreadsheet, site: str):
     try:
         return gsheet.worksheet(site)
 
     except gspread.WorksheetNotFound:
         return gsheet.add_worksheet(title=site, rows=ROWS, cols=COLS)
 
-def update_site(gsheet:Spreadsheet, site:str, link:str) -> DataFrame:
+
+def update_site(gsheet: Spreadsheet, site: str, link: str) -> DataFrame:
 
     try:
         # Accessing current flats for site
@@ -74,8 +78,9 @@ def update_site(gsheet:Spreadsheet, site:str, link:str) -> DataFrame:
 
     except Exception as e:
         print(f'[ {now()} ]: Update to {site} failed due to exception!\n{e}')
-        
+
         return DataFrame()
+
 
 def main() -> None:
     if not os.path.exists(CONFIG_PATH):
@@ -103,14 +108,14 @@ def main() -> None:
 
     for site in sites.keys():
         flats = update_site(gsheet, site, sites[site])
-        
+
         if not flats.empty:
             # Add divider between sites
             if email_body != '':
                 email_body += SITE_DIVIDER
 
             email_body += f'{flats.shape[0]} New flat(s) on {site}' + FLAT_DIVIDER
-            email_body += FLAT_DIVIDER.join(map(listing_to_email, flats.values.tolist()))                     
+            email_body += FLAT_DIVIDER.join(map(listing_to_email, flats.values.tolist()))
 
     # Send email if any new flat is found
     if email_body != '':
@@ -119,9 +124,9 @@ def main() -> None:
 
     sys.exit(0)
 
+
 if __name__ == '__main__':
     try:
         main()
     except Exception as e:
         print(f'[ {now()} ]: The following errors occured:\n{e}')
-        
