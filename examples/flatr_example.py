@@ -1,13 +1,13 @@
-import sys
-from flatr.utils import EmailClient
-from flatr import sites
 import os
+import sys
 import json
 import gspread
 from gspread.spreadsheet import Spreadsheet
+from flatr import sites
 from pandas import DataFrame
 from datetime import datetime
 from typing import List
+from email_client import EmailClient
 
 SRC_DIR = os.path.dirname(__file__)
 CONFIG_PATH = os.path.join(SRC_DIR, './config.json')
