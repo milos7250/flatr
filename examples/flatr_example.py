@@ -18,13 +18,13 @@ ROWS = 1000
 COLS = 6
 
 SITE_CLASSES = {
+    'GrantProperty': sites.GrantProperty,
     'Gumtree': sites.Gumtree,
-    'Zoopla': sites.Zoopla,
     'OnTheMarket': sites.OnTheMarket,
     'Rightmove': sites.Rightmove,
     'Spareroom': sites.Spareroom,
     'ZoneLetting': sites.ZoneLetting,
-    'GrantProperty': sites.GrantProperty
+    'Zoopla': sites.Zoopla
 }
 
 
