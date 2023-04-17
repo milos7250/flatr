@@ -12,28 +12,28 @@ class Gumtree(Site):
     def __init__(self, link: str):
         super().__init__(link, headers=Gumtree.HEADERS)
 
-    def get_title(self, listing: Tag) -> str:
+    def _get_title(self, listing: Tag) -> str:
         try:
             return str(listing.select('.listing-title')[0].string).strip('\n')
 
         except Exception:
             return self.MISSING
 
-    def get_link(self, listing: Tag) -> str:
+    def _get_link(self, listing: Tag) -> str:
         try:
             return Gumtree.PREPEND + str(listing.select('.listing-link')[0]['href'])
 
         except Exception:
             return self.MISSING
 
-    def get_price(self, listing: Tag) -> str:
+    def _get_price(self, listing: Tag) -> str:
         try:
             return str(listing.select('.listing-price')[0].strong.string)
 
         except Exception:
             return self.MISSING
 
-    def get_availability(self, listing: Tag) -> str:
+    def _get_availability(self, listing: Tag) -> str:
         attributes = dict()
 
         for li in listing.select('.listing-attributes')[0].findAll('li'):
@@ -46,5 +46,5 @@ class Gumtree(Site):
 
         return self.MISSING
 
-    def get_raw_listings(self) -> ResultSet:
+    def _get_raw_listings(self) -> ResultSet:
         return self.soup.find_all('li', {'class': 'natural'})

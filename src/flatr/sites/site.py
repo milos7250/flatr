@@ -14,38 +14,38 @@ class Site(ABC):
         self.response = requests.get(self.link, headers=headers)
         self.soup = BeautifulSoup(self.response.text, 'html.parser')
 
-    def parse_listing(self, listing: Tag) -> Listing:
-        title = self.get_title(listing)
-        price = self.get_price(listing)
-        available = self.get_availability(listing)
-        link = self.get_link(listing)
-
-        return Listing(title, price, available, link)
-
     def get_listings(self) -> List[Listing]:
-        raw_listings = self.get_raw_listings()
+        raw_listings = self._get_raw_listings()
         listings = []
         for listing in raw_listings:
-            listings.append(self.parse_listing(listing))
+            listings.append(self._parse_listing(listing))
 
         return listings[::-1]
 
+    def _parse_listing(self, listing: Tag) -> Listing:
+        title = self._get_title(listing)
+        price = self._get_price(listing)
+        available = self._get_availability(listing)
+        link = self._get_link(listing)
+
+        return Listing(title, price, available, link)
+
     @abstractmethod
-    def get_title(self, listing: Tag) -> str:
+    def _get_raw_listings(self) -> ResultSet:
         pass
 
     @abstractmethod
-    def get_link(self, listing: Tag) -> str:
+    def _get_title(self, listing: Tag) -> str:
         pass
 
     @abstractmethod
-    def get_price(self, listing: Tag) -> str:
+    def _get_price(self, listing: Tag) -> str:
         pass
 
     @abstractmethod
-    def get_availability(self, listing: Tag) -> str:
+    def _get_availability(self, listing: Tag) -> str:
         pass
 
     @abstractmethod
-    def get_raw_listings(self) -> ResultSet:
+    def _get_link(self, listing: Tag) -> str:
         pass

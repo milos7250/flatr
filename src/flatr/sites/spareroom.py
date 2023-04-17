@@ -13,14 +13,14 @@ class Spareroom(Site):
     def __init__(self, link: str):
         super().__init__(link, headers=Spareroom.HEADERS)
 
-    def get_title(self, listing: Tag) -> str:
+    def _get_title(self, listing: Tag) -> str:
         try:
             return str(listing.h2.string).strip()
 
         except Exception:
             return Spareroom.MISSING
 
-    def get_link(self, listing: Tag) -> str:
+    def _get_link(self, listing: Tag) -> str:
         try:
             raw_link = listing.select('a[class="advertDescription"]')[0]['href']
             return Spareroom.PREPEND + str(re.sub(r'&search_id=.*', '', raw_link))
@@ -28,18 +28,18 @@ class Spareroom(Site):
         except Exception:
             return Spareroom.MISSING
 
-    def get_price(self, listing: Tag) -> str:
+    def _get_price(self, listing: Tag) -> str:
         try:
             return str(listing.header.a.strong.get_text())
         except Exception:
             return Spareroom.MISSING
 
-    def get_availability(self, listing: Tag) -> str:
+    def _get_availability(self, listing: Tag) -> str:
         try:
             return str(listing.select('div.listing-results-content.desktop')[0].strong.get_text())
 
         except Exception:
             return Spareroom.MISSING
 
-    def get_raw_listings(self) -> ResultSet:
+    def _get_raw_listings(self) -> ResultSet:
         return self.soup.find_all('li', {'class': 'listing-result'})
