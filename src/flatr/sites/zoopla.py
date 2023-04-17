@@ -13,19 +13,14 @@ class Zoopla(Site):
     def __init__(self, link: str):
         super().__init__(link, headers=Zoopla.HEADERS)
 
+    def _get_raw_listings(self) -> ResultSet:
+        return self.soup.find_all('div', {'data-testid': re.compile(r'search-result_listing_*')})
+
     def _get_title(self, listing: Tag) -> str:
         try:
             raw_title = listing.select('h2[data-testid="listing-title"]')[0].string
             location = listing.select('p[data-testid="listing-description"]')[0].string
             return f'{raw_title} at {location}'
-
-        except Exception:
-            return self.MISSING
-
-    def _get_link(self, listing: Tag) -> str:
-        try:
-            raw_url = listing.select('a[data-testid="listing-details-link"]')[0]['href']
-            return Zoopla.PREPEND + str(re.sub(r'\?search_identifier=[a-f0-9]*', '', raw_url))
 
         except Exception:
             return self.MISSING
@@ -44,5 +39,10 @@ class Zoopla(Site):
         except Exception:
             return self.MISSING
 
-    def _get_raw_listings(self) -> ResultSet:
-        return self.soup.find_all('div', {'data-testid': re.compile(r'search-result_listing_*')})
+    def _get_link(self, listing: Tag) -> str:
+        try:
+            raw_url = listing.select('a[data-testid="listing-details-link"]')[0]['href']
+            return Zoopla.PREPEND + str(re.sub(r'\?search_identifier=[a-f0-9]*', '', raw_url))
+
+        except Exception:
+            return self.MISSING

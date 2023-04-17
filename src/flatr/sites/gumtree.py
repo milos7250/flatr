@@ -12,16 +12,12 @@ class Gumtree(Site):
     def __init__(self, link: str):
         super().__init__(link, headers=Gumtree.HEADERS)
 
+    def _get_raw_listings(self) -> ResultSet:
+        return self.soup.find_all('li', {'class': 'natural'})
+
     def _get_title(self, listing: Tag) -> str:
         try:
             return str(listing.select('.listing-title')[0].string).strip('\n')
-
-        except Exception:
-            return self.MISSING
-
-    def _get_link(self, listing: Tag) -> str:
-        try:
-            return Gumtree.PREPEND + str(listing.select('.listing-link')[0]['href'])
 
         except Exception:
             return self.MISSING
@@ -46,5 +42,9 @@ class Gumtree(Site):
 
         return self.MISSING
 
-    def _get_raw_listings(self) -> ResultSet:
-        return self.soup.find_all('li', {'class': 'natural'})
+    def _get_link(self, listing: Tag) -> str:
+        try:
+            return Gumtree.PREPEND + str(listing.select('.listing-link')[0]['href'])
+
+        except Exception:
+            return self.MISSING

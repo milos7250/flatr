@@ -10,19 +10,14 @@ class ZoneLetting(Site):
     def __init__(self, link: str):
         super().__init__(link)
 
+    def _get_raw_listings(self) -> ResultSet:
+        return self.soup.find_all('div', {'class': 'propertyItem'})
+
     def _get_title(self, listing: Tag) -> str:
         try:
             bedrooms = listing.select('div[class="zText semiSmallText semiBoldWeight propertyMetaItem"]')[-1].contents[-1]
             location = listing.select('p', {'class': 'proAddress'})[0].contents[-1]
             return f'{bedrooms} flat at {location}'
-
-        except Exception:
-            return self.MISSING
-
-    def _get_link(self, listing: Tag) -> str:
-        try:
-            raw_link = str(listing.a['href'])
-            return ZoneLetting.PREPEND + raw_link
 
         except Exception:
             return self.MISSING
@@ -45,5 +40,10 @@ class ZoneLetting(Site):
         except Exception:
             return self.MISSING
 
-    def _get_raw_listings(self) -> ResultSet:
-        return self.soup.find_all('div', {'class': 'propertyItem'})
+    def _get_link(self, listing: Tag) -> str:
+        try:
+            raw_link = str(listing.a['href'])
+            return ZoneLetting.PREPEND + raw_link
+
+        except Exception:
+            return self.MISSING

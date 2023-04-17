@@ -12,7 +12,10 @@ class ClassName(Site):
     def __init__(self, link: str):
         super().__init__(link, headers=ClassName.HEADERS)
 
-    def get_title(self, listing: Tag) -> str:
+    def _get_raw_listings(self) -> ResultSet:
+        return self.soup.find_all('css tag', {'class': 'listing class'})
+
+    def _get_title(self, listing: Tag) -> str:
         try:
             raw_title = listing.select('CSS selector')[0].a.string
             location = listing.select('CSS selector')[0].a.string
@@ -21,25 +24,22 @@ class ClassName(Site):
         except Exception:
             return self.MISSING
 
-    def get_link(self, listing: Tag) -> str:
+    def _get_price(self, listing: Tag) -> str:
+        try:
+            return str(listing.select('CSS selector')[0].string)
+        except Exception:
+            return self.MISSING
+
+    def _get_availability(self, listing: Tag) -> str:
+        try:
+            return str(listing.select('CSS selector')[0].string)
+        except Exception:
+            return self.MISSING
+
+    def _get_link(self, listing: Tag) -> str:
         try:
             raw_link = str(listing.select('CSS selector')[0].a['href'])
             return ClassName.PREPEND + raw_link
 
         except Exception:
             return self.MISSING
-
-    def get_price(self, listing: Tag) -> str:
-        try:
-            return str(listing.select('CSS selector')[0].string)
-        except Exception:
-            return self.MISSING
-
-    def get_availability(self, listing: Tag) -> str:
-        try:
-            return str(listing.select('CSS selector')[0].string)
-        except Exception:
-            return self.MISSING
-
-    def get_raw_listings(self) -> ResultSet:
-        return self.soup.find_all('css tag', {'class': 'listing class'})
