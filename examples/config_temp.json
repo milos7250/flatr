@@ -1,0 +1,20 @@
+{
+    "google_credentials": "relative/path/from/example/to/google_credentials.json",
+    "spreadsheet": "spreadsheet title",
+    "email": {
+        "user": "user gmail email address used for sending email",
+        "password": "password/key for login",
+        "from": "sender email address",
+        "to": ["first.recipient@gmail.com", "second.recipient@gmail.com"],
+        "subject": "Email subject"
+    },
+    "sites": {
+        "GrantProperty": "https://www.grantproperty.com/tenants/properties/",
+        "Gumtree": "https://www.gumtree.com/search?search_category=property-to-rent",
+        "OnTheMarket": "https://www.onthemarket.com/to-rent/property/edinburgh/",
+        "Rightmove": "https://www.rightmove.co.uk/property-to-rent/find.html?searchType=RENT&locationIdentifier=REGION%5E475&insId=1&radius=0.0&minPrice=&maxPrice=&minBedrooms=&maxBedrooms=&displayPropertyType=&maxDaysSinceAdded=&sortByPriceDescending=&_includeLetAgreed=on&primaryDisplayPropertyType=&secondaryDisplayPropertyType=&oldDisplayPropertyType=&oldPrimaryDisplayPropertyType=&letType=&letFurnishType=&houseFlatShare=",
+        "Spareroom": "https://www.spareroom.co.uk/flatshare/index.cgi?&search_id=1212087156&offset=0&sort_by=days_since_placed",
+        "ZoneLetting": "https://zonegroup.co.uk/search-property/rent",
+        "Zoopla": "https://www.zoopla.co.uk/to-rent/property/edinburgh-county/?price_frequency=per_month&q=Edinburgh&search_source=home"   
+    }
+}
