@@ -11,7 +11,7 @@ notebooks
 
 # Exclude .json files, except the configuration template
 *.json
-!example/config_temp.json
+!examples/config_temp.json
 
 # Exclude cron scheduling log
 src/cron.log
