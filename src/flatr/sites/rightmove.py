@@ -5,9 +5,13 @@ from bs4.element import Tag, ResultSet
 
 class Rightmove(Site):
     PREPEND = 'rightmove.co.uk'
+    HEADERS = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36',
+        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+    }
 
     def __init__(self, link: str):
-        super().__init__(link)
+        super().__init__(link, headers=Rightmove.HEADERS)
 
     def _get_raw_listings(self) -> ResultSet:
         return self.soup.find_all('div', {'id': re.compile(r'property-[0-9]{9}')})

@@ -6,12 +6,11 @@ PASS_SITES = [
     (sites.GrantProperty, 'https://www.grantproperty.com/tenants/properties/'),
     (sites.Gumtree, 'https://www.gumtree.com/search?search_category=property-to-rent'),
     (sites.OnTheMarket, 'https://www.onthemarket.com/to-rent/property/edinburgh/'),
-    (sites.Rightmove, 'https://www.rightmove.co.uk/property-to-rent/find.html?searchType=RENT\
-        &locationIdentifier=REGION%5E475&insId=1&radius=0.0&minPrice=&maxPrice=&minBedrooms=\
-        &maxBedrooms=&displayPropertyType=&maxDaysSinceAdded=&sortByPriceDescending=\
-        &_includeLetAgreed=on&primaryDisplayPropertyType=&secondaryDisplayPropertyType=\
-        &oldDisplayPropertyType=&oldPrimaryDisplayPropertyType=&letType=&letFurnishType=&houseFlatShare='),
-    (sites.Spareroom, 'https://www.spareroom.co.uk/flatshare/index.cgi?&search_id=1212087156&offset=0&sort_by=days_since_placed'),
+    (sites.Rightmove, 'https://www.rightmove.co.uk/property-to-rent/find.html?searchType=RENT&locationIdentifier=REGION%5E475\
+     &insId=1&radius=0.0&minPrice=&maxPrice=1100&minBedrooms=2&maxBedrooms=2&displayPropertyType=&maxDaysSinceAdded=3\
+     &sortByPriceDescending=&_includeLetAgreed=on&primaryDisplayPropertyType=&secondaryDisplayPropertyType=&oldDisplayPropertyType=\
+     &oldPrimaryDisplayPropertyType=&letType=&letFurnishType=&houseFlatShare='),
+    (sites.Spareroom, 'https://www.spareroom.co.uk/flatshare/?sort_by=days_since_placed'),
     (sites.ZoneLetting, 'https://zonegroup.co.uk/search-property/rent'),
     # (sites.Zoopla, 'https://www.zoopla.co.uk/to-rent/property/edinburgh-county/?price_frequency=per_month&q=Edinburgh&search_source=home')
 ]

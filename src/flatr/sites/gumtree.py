@@ -13,38 +13,34 @@ class Gumtree(Site):
         super().__init__(link, headers=Gumtree.HEADERS)
 
     def _get_raw_listings(self) -> ResultSet:
-        return self.soup.find_all('li', {'class': 'natural'})
+        return self.soup.find_all('a', {'data-q': 'search-result-anchor'})
 
     def _get_title(self, listing: Tag) -> str:
         try:
-            return str(listing.select('.listing-title')[0].string).strip('\n')
+            return str(listing.find_all('div', {'data-q': 'tile-title'})[0].string).strip()
 
         except Exception:
             return self.MISSING
 
     def _get_price(self, listing: Tag) -> str:
         try:
-            return str(listing.select('.listing-price')[0].strong.string)
+            return str(listing.find_all('div', {'data-q': 'tile-price'})[0].string)
 
         except Exception:
             return self.MISSING
 
     def _get_availability(self, listing: Tag) -> str:
-        attributes = dict()
+        try:
+            div = listing.find_all('div', {'data-q': 'tile-description'})[0].div
+            details = [span.text for span in div.find_all('span')]
+            return str(details[1].replace('Date available: ', ''))
 
-        for li in listing.select('.listing-attributes')[0].findAll('li'):
-            list(map(lambda x: str(x.string), li.findAll('span')))
-            key, value = li.findAll('span')
-            attributes[key.string] = value.string
-
-        if 'Date available' in attributes:
-            return str(attributes['Date available'])
-
-        return self.MISSING
+        except Exception:
+            return self.MISSING
 
     def _get_link(self, listing: Tag) -> str:
         try:
-            return Gumtree.PREPEND + str(listing.select('.listing-link')[0]['href'])
+            return Gumtree.PREPEND + str(listing['href'])
 
         except Exception:
             return self.MISSING

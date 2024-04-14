@@ -23,22 +23,22 @@ Flatr is a webscraping python package developed to aid flat hunting in the UK. I
 Make sure to have `Python 3.8 or higher` installed on your machine or the environment you are using.
 
 ```console
-// Clone this repository
+# Clone this repository
 git clone https://github.com/MarioMihaly/flatr.git
-// Change directory
+# Change directory
 cd flatr
-// Install the flatr package
+# Install the flatr package
 pip install .
 ```
 
 If you wish to continue developemnt, install the `development requirements`. This way the `flatr` package is installed using the `editable` flag with `pip`.
 
 ```console
-// Clone this repository
+# Clone this repository
 git clone https://github.com/MarioMihaly/flatr.git
-// Change directory
+# Change directory
 cd flatr
-// Install requirements for development
+# Install requirements for development
 pip install -r requirements_dev.txt
 ```
 
