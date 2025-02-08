@@ -3,7 +3,7 @@ from flatr import sites
 
 
 PASS_SITES = [
-    (sites.GrantProperty, 'https://www.grantproperty.com/tenants/properties/'),
+    # (sites.GrantProperty, 'https://www.grantproperty.com/tenants/properties/'),
     (sites.Gumtree, 'https://www.gumtree.com/search?search_category=property-to-rent'),
     (sites.OnTheMarket, 'https://www.onthemarket.com/to-rent/property/edinburgh/'),
     (sites.Rightmove, 'https://www.rightmove.co.uk/property-to-rent/find.html?searchLocation=Edinburgh&useLocationIdentifier=true&locationIdentifier=REGION%5E475&radius=0.0&_includeLetAgreed=on&includeLetAgreed=false'),
@@ -13,7 +13,7 @@ PASS_SITES = [
 ]
 
 PASS_IDS = [
-    'grantproperty',
+    # 'grantproperty',
     'gumtree',
     'onthemarket',
     'rightmove',

@@ -6,7 +6,7 @@ Flatr is a webscraping python package developed to aid flat hunting in the UK. I
 
 **Note: Webscraping on some of the supported sites is restricted. To view allowed activiteis, check `<site-url-root>/robots.txt`.**
 
-* <a href="https://www.grantproperty.com/tenants/properties/" target="_blank">Grant Property</a>
+<!-- * <a href="https://www.grantproperty.com/tenants/properties/" target="_blank">Grant Property</a> -->
 * <a href="https://www.gumtree.com/search?search_category=property-to-rent" target="_blank">Gumtree</a>
 * <a href="https://www.onthemarket.com/to-rent/property/edinburgh/" target="_blank">On The Market</a>
 * <a href="https://www.rightmove.co.uk/property-to-rent" target="_blank">Rightmove</a>
