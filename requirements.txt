@@ -1,6 +1,6 @@
-pandas==1.4.2
-gspread==5.4.0
-cachetools==4.2.2
-requests==2.27.1
-beautifulsoup4==4.11.1
+pandas>=1
+gspread>=5
+cachetools>=4
+requests>=2
+beautifulsoup4>=4
 -e .
