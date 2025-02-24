@@ -7,6 +7,7 @@ from .rightmove import Rightmove
 from .spareroom import Spareroom
 from .zoneletting import ZoneLetting
 from .grantproperty import GrantProperty
+from .domus import Domus
 
 __all__ = ['Listing',
            'Site',
@@ -16,4 +17,5 @@ __all__ = ['Listing',
            'Rightmove',
            'Spareroom',
            'ZoneLetting',
-           'GrantProperty']
+           'GrantProperty',
+           'Domus']
