@@ -1,33 +1,35 @@
 import re
+
+from bs4.element import ResultSet, Tag
+
 from .site import Site
-from bs4.element import Tag, ResultSet
 
 
 class Rightmove(Site):
-    PREPEND = 'rightmove.co.uk'
+    PREPEND = "https://rightmove.co.uk"
     HEADERS = {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36',
-        'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
     }
 
     def __init__(self, link: str):
         super().__init__(link, headers=Rightmove.HEADERS)
 
     def _get_raw_listings(self) -> ResultSet:
-        return self.soup.find_all('div', {'data-testid': re.compile(r'propertyCard-[0-9]{1}')})
+        return self.soup.find_all("div", {"data-testid": re.compile(r"propertyCard-[0-9]{1}")})
 
     def _get_title(self, listing: Tag) -> str:
         try:
-            location = listing.select('address')[0].text.strip()
-            bedrooms = listing.select('span[class=PropertyInformation_bedroomsCount___2b5R]')[0].string.strip()
-            return f'{bedrooms} bedroom(s) property at {location}'
+            location = listing.select("address")[0].text.strip()
+            bedrooms = listing.select("span[class=PropertyInformation_bedroomsCount___2b5R]")[0].string.strip()
+            return f"{bedrooms} bedroom(s) property at {location}"
 
         except Exception:
             return self.MISSING
 
     def _get_price(self, listing: Tag) -> str:
         try:
-            return str(listing.select('div[class=PropertyPrice_price__VL65t]')[0].string.strip())
+            return str(listing.select("div[class=PropertyPrice_price__VL65t]")[0].string.strip())
         except Exception:
             return self.MISSING
 
@@ -36,8 +38,8 @@ class Rightmove(Site):
 
     def _get_link(self, listing: Tag) -> str:
         try:
-            raw_link = listing.select('a[class=propertyCard-link]')[0]['href']
-            return Rightmove.PREPEND + str(re.sub(r'#/\?channel=RES_LET', '', raw_link))
+            raw_link = listing.select("a[class=propertyCard-link]")[0]["href"]
+            return Rightmove.PREPEND + str(re.sub(r"#/\?channel=RES_LET", "", raw_link))
 
         except Exception:
             return self.MISSING
