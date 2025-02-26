@@ -3,11 +3,11 @@ from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
 import requests
+from bs4 import BeautifulSoup
 
 if TYPE_CHECKING:
     from typing import Dict, List
 
-    from bs4 import BeautifulSoup
     from bs4.element import ResultSet, Tag
 
 from .listing import Listing
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 class Site(ABC):
     MISSING = "Missing"
 
-    def __init__(self, link: str, headers: Dict[str, str] = dict()):
+    def __init__(self, link: str, headers: "Dict[str, str]" = dict()):
         self.link = link
         try:
             self.response = requests.get(self.link, headers=headers)
@@ -26,7 +26,7 @@ class Site(ABC):
         except Exception:
             log.exception("Failed to initialize site")
 
-    def get_listings(self) -> List[Listing]:
+    def get_listings(self) -> "List[Listing]":
         try:
             raw_listings = self._get_raw_listings()
             listings = []
@@ -37,7 +37,7 @@ class Site(ABC):
             log.exception("Failed to get listings")
             return []
 
-    def _parse_listing(self, listing: Tag) -> Listing:
+    def _parse_listing(self, listing: "Tag") -> "Listing":
         try:
             title = self._get_title(listing)
             price = self._get_price(listing)
@@ -48,7 +48,7 @@ class Site(ABC):
             log.exception("Failed to parse listing")
             return Listing(self.MISSING, self.MISSING, self.MISSING, self.MISSING, self)
 
-    def _get_availability(self, listing: Tag = None, link: str = None) -> str:
+    def _get_availability(self, listing: "Tag" = None, link: str = None) -> str:
         try:
             if link:
                 response = requests.get(link, headers=self.HEADERS)
@@ -62,25 +62,25 @@ class Site(ABC):
             return self.MISSING
 
     @abstractmethod
-    def _get_raw_listings(self) -> ResultSet:
+    def _get_raw_listings(self) -> "ResultSet":
         pass
 
     @abstractmethod
-    def _get_title(self, listing: Tag) -> str:
+    def _get_title(self, listing: "Tag") -> str:
         pass
 
     @abstractmethod
-    def _get_price(self, listing: Tag) -> str:
+    def _get_price(self, listing: "Tag") -> str:
         pass
 
     @abstractmethod
-    def _get_availability_no_crawl(self, listing: Tag) -> str:
+    def _get_availability_no_crawl(self, listing: "Tag") -> str:
         pass
 
     @abstractmethod
-    def _get_availability_crawl(self, soup: BeautifulSoup) -> str:
+    def _get_availability_crawl(self, soup: "BeautifulSoup") -> str:
         pass
 
     @abstractmethod
-    def _get_link(self, listing: Tag) -> str:
+    def _get_link(self, listing: "Tag") -> str:
         pass

@@ -20,10 +20,10 @@ class OnTheMarket(Site):
     def __init__(self, link: str):
         super().__init__(link, headers=OnTheMarket.HEADERS)
 
-    def _get_raw_listings(self) -> ResultSet:
+    def _get_raw_listings(self) -> "ResultSet":
         return self.soup.find_all("li", {"class": "otm-PropertyCard"})
 
-    def _get_title(self, listing: Tag) -> str:
+    def _get_title(self, listing: "Tag") -> str:
         try:
             raw_title = listing.select('span[class="title"]')[0].a.string
             location = listing.select('span[class="address"]')[0].a.string
@@ -32,20 +32,20 @@ class OnTheMarket(Site):
             log.exception("Failed to get title")
             return self.MISSING
 
-    def _get_price(self, listing: Tag) -> str:
+    def _get_price(self, listing: "Tag") -> str:
         try:
             return str(listing.select('div[class="otm-Price"]')[0].string)
         except Exception:
             log.exception("Failed to get price")
             return self.MISSING
 
-    def _get_availability_no_crawl(self, listing: Tag) -> str:
+    def _get_availability_no_crawl(self, listing: "Tag") -> str:
         return self.MISSING
 
-    def _get_availability_crawl(self, soup: BeautifulSoup) -> str:
+    def _get_availability_crawl(self, soup: "BeautifulSoup") -> str:
         return self.MISSING
 
-    def _get_link(self, listing: Tag) -> str:
+    def _get_link(self, listing: "Tag") -> str:
         try:
             raw_link = str(listing.select('div[class="otm-PropertyCardMedia"]')[0].a["href"])
             return OnTheMarket.PREPEND + raw_link
