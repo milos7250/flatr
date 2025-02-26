@@ -1,4 +1,5 @@
 import re
+from datetime import datetime
 
 from bs4.element import ResultSet, Tag
 
@@ -33,8 +34,20 @@ class Rightmove(Site):
         except Exception:
             return self.MISSING
 
-    def _get_availability(self, listing: Tag) -> str:
+    def _get_availability_no_crawl(self, listing: Tag) -> str:
         return self.MISSING
+
+    def _get_availability_crawl(self, soup) -> str:
+        try:
+            strdate = soup.select_one("div[class=_2RnXSVJcWbWv4IpBC1Sng6]").select_one("dd").text.strip()
+            if strdate == "Now":
+                return datetime.now().strftime("%d/%m/%Y")
+            try:
+                return datetime.strptime(strdate, "%d/%m/%Y").strftime("%d/%m/%Y")
+            except Exception:
+                return strdate
+        except Exception:
+            return self.MISSING
 
     def _get_link(self, listing: Tag) -> str:
         try:

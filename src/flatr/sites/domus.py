@@ -1,4 +1,9 @@
-from bs4.element import ResultSet, Tag
+from datetime import datetime
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from bs4 import BeautifulSoup
+    from bs4.element import ResultSet, Tag
 
 from . import Site
 
@@ -38,8 +43,19 @@ class Domus(Site):
         except Exception:
             return self.MISSING
 
-    def _get_availability(self, listing: Tag) -> str:
+    def _get_availability_no_crawl(self, listing: Tag) -> str:
         return self.MISSING
+
+    def _get_availability_crawl(self, soup: BeautifulSoup) -> str:
+        try:
+            strdate = soup.select_one("p[class=available-from]").text.replace("Available from: ", "").strip()
+            try:
+                return datetime.strptime(strdate, "%d/%m/%Y").strftime("%d/%m/%Y")
+            except Exception as e:
+                print(f"Failed to parse date: {strdate} due to {e}\n")
+                return strdate
+        except Exception:
+            return self.MISSING
 
     def _get_link(self, listing: Tag) -> str:
         try:
