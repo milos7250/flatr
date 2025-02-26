@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -6,6 +7,8 @@ if TYPE_CHECKING:
     from bs4.element import ResultSet, Tag
 
 from . import Site
+
+log = logging.getLogger(__name__)
 
 
 class Domus(Site):
@@ -35,12 +38,14 @@ class Domus(Site):
             return f"{raw_title} at {location}"
 
         except Exception:
+            log.exception("Failed to get title")
             return self.MISSING
 
     def _get_price(self, listing: Tag) -> str:
         try:
             return str(listing.select_one("span[class=rental-price]").text)
         except Exception:
+            log.exception("Failed to get price")
             return self.MISSING
 
     def _get_availability_no_crawl(self, listing: Tag) -> str:
@@ -51,16 +56,17 @@ class Domus(Site):
             strdate = soup.select_one("p[class=available-from]").text.replace("Available from: ", "").strip()
             try:
                 return datetime.strptime(strdate, "%d/%m/%Y").strftime("%d/%m/%Y")
-            except Exception as e:
-                print(f"Failed to parse date: {strdate} due to {e}\n")
+            except Exception:
+                log.exception(f"Failed to parse date: {strdate}")
                 return strdate
         except Exception:
+            log.exception("Failed to get availability")
             return self.MISSING
 
     def _get_link(self, listing: Tag) -> str:
         try:
             raw_link = str(listing.select_one("a[class=property-title-link]")["href"])
             return Domus.PREPEND + raw_link
-
         except Exception:
+            log.exception("Failed to get link")
             return self.MISSING

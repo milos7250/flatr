@@ -1,9 +1,12 @@
+import logging
 import re
 from datetime import datetime
 
 from bs4.element import ResultSet, Tag
 
 from .site import Site
+
+log = logging.getLogger(__name__)
 
 
 class Rightmove(Site):
@@ -26,12 +29,14 @@ class Rightmove(Site):
             return f"{bedrooms} bedroom(s) property at {location}"
 
         except Exception:
+            log.exception("Failed to get title")
             return self.MISSING
 
     def _get_price(self, listing: Tag) -> str:
         try:
             return str(listing.select("div[class=PropertyPrice_price__VL65t]")[0].string.strip())
         except Exception:
+            log.exception("Failed to get price")
             return self.MISSING
 
     def _get_availability_no_crawl(self, listing: Tag) -> str:
@@ -45,8 +50,10 @@ class Rightmove(Site):
             try:
                 return datetime.strptime(strdate, "%d/%m/%Y").strftime("%d/%m/%Y")
             except Exception:
+                log.exception(f"Failed to parse date: {strdate}.")
                 return strdate
         except Exception:
+            log.exception("Failed to get availability")
             return self.MISSING
 
     def _get_link(self, listing: Tag) -> str:
@@ -55,4 +62,5 @@ class Rightmove(Site):
             return Rightmove.PREPEND + str(re.sub(r"#/\?channel=RES_LET", "", raw_link))
 
         except Exception:
+            log.exception("Failed to get link")
             return self.MISSING

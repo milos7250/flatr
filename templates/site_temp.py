@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from typing import TYPE_CHECKING
 
@@ -6,6 +7,8 @@ if TYPE_CHECKING:
     from bs4.element import ResultSet, Tag
 
 from .site import Site
+
+log = logging.getLogger(__name__)
 
 
 class ClassName(Site):
@@ -27,12 +30,14 @@ class ClassName(Site):
             location = listing.select("CSS selector")[0].a.string
             return f"{raw_title} at {location}"
         except Exception:
+            log.exception("Failed to get title")
             return self.MISSING
 
     def _get_price(self, listing: Tag) -> str:
         try:
             return str(listing.select("CSS selector")[0].string)
         except Exception:
+            log.exception("Failed to get price")
             return self.MISSING
 
     def _get_availability_no_crawl(self, listing: Tag) -> str:
@@ -45,8 +50,10 @@ class ClassName(Site):
                     "%d/%m/%Y"
                 )  # format is dd/mm/yyyy, adjust as needed
             except Exception:
+                log.exception(f"Failed to parse date: {strdate}")
                 return strdate
         except Exception:
+            log.exception("Failed to get availability")
             return self.MISSING
 
     def _get_availability_crawl(self, soup: BeautifulSoup) -> str:
@@ -59,8 +66,10 @@ class ClassName(Site):
                     "%d/%m/%Y"
                 )  # format is dd/mm/yyyy, adjust as needed
             except Exception:
+                log.exception(f"Failed to parse date: {strdate}")
                 return strdate
         except Exception:
+            log.exception("Failed to get availability")
             return self.MISSING
 
     def _get_link(self, listing: Tag) -> str:
@@ -68,4 +77,5 @@ class ClassName(Site):
             raw_link = str(listing.select("CSS selector")[0].a["href"])
             return ClassName.PREPEND + raw_link
         except Exception:
+            log.exception("Failed to get link")
             return self.MISSING

@@ -1,3 +1,4 @@
+import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -5,6 +6,8 @@ if TYPE_CHECKING:
     from bs4.element import ResultSet, Tag
 
 from .site import Site
+
+log = logging.getLogger(__name__)
 
 
 class Gumtree(Site):
@@ -23,15 +26,15 @@ class Gumtree(Site):
     def _get_title(self, listing: Tag) -> str:
         try:
             return str(listing.find_all("div", {"data-q": "tile-title"})[0].string).strip()
-
         except Exception:
+            log.exception("Failed to get title")
             return self.MISSING
 
     def _get_price(self, listing: Tag) -> str:
         try:
             return str(listing.find_all("div", {"data-q": "tile-price"})[0].string)
-
         except Exception:
+            log.exception("Failed to get price")
             return self.MISSING
 
     def _get_availability_no_crawl(self, listing: Tag) -> str:
@@ -39,8 +42,8 @@ class Gumtree(Site):
             div = listing.find_all("div", {"data-q": "tile-description"})[0].div
             details = [span.text for span in div.find_all("span")]
             return str(details[1].replace("Date available: ", ""))
-
         except Exception:
+            log.exception("Failed to get availability")
             return self.MISSING
 
     def _get_availability_crawl(self, soup: BeautifulSoup) -> str:
@@ -49,6 +52,6 @@ class Gumtree(Site):
     def _get_link(self, listing: Tag) -> str:
         try:
             return Gumtree.PREPEND + str(listing["href"])
-
         except Exception:
+            log.exception("Failed to get link")
             return self.MISSING

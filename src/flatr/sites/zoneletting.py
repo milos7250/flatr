@@ -1,3 +1,4 @@
+import logging
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -5,6 +6,8 @@ if TYPE_CHECKING:
     from bs4.element import ResultSet, Tag
 
 from .site import Site
+
+log = logging.getLogger(__name__)
 
 
 class ZoneLetting(Site):
@@ -23,8 +26,8 @@ class ZoneLetting(Site):
             ]
             location = listing.select("p", {"class": "proAddress"})[0].contents[-1]
             return f"{bedrooms} flat at {location}"
-
         except Exception:
+            log.exception("Failed to get title")
             return self.MISSING
 
     def _get_price(self, listing: Tag) -> str:
@@ -32,8 +35,8 @@ class ZoneLetting(Site):
             price_str = str(listing.h3.string)
             start_idx = price_str.find("£")
             return price_str[start_idx:]
-
         except Exception:
+            log.exception("Failed to get price")
             return self.MISSING
 
     def _get_availability_no_crawl(self, listing: Tag) -> str:
@@ -45,12 +48,13 @@ class ZoneLetting(Site):
                 soup.select('div[class="zText semiMediumText semiBoldWeight metaDataSectionItem"]')[0].span.string
             )
         except Exception:
+            log.exception("Failed to get availability")
             return self.MISSING
 
     def _get_link(self, listing: Tag) -> str:
         try:
             raw_link = str(listing.a["href"])
             return ZoneLetting.PREPEND + raw_link
-
         except Exception:
+            log.exception("Failed to get link")
             return self.MISSING
