@@ -1,3 +1,4 @@
+import logging
 import re
 from typing import TYPE_CHECKING
 
@@ -6,6 +7,8 @@ if TYPE_CHECKING:
     from bs4.element import ResultSet, Tag
 
 from .site import Site
+
+log = logging.getLogger(__name__)
 
 
 class Zoopla(Site):
@@ -26,22 +29,22 @@ class Zoopla(Site):
             raw_title = listing.select('h2[data-testid="listing-title"]')[0].string
             location = listing.select('p[data-testid="listing-description"]')[0].string
             return f"{raw_title} at {location}"
-
         except Exception:
+            log.exception("Failed to get title")
             return self.MISSING
 
     def _get_price(self, listing: Tag) -> str:
         try:
             return str(listing.select('div[data-testid="listing-price"]')[0].p.string)
-
         except Exception:
+            log.exception("Failed to get price")
             return self.MISSING
 
     def _get_availability_no_crawl(self, listing: Tag) -> str:
         try:
             return str(listing.find_all("span", {"data-testid": "available-from-date"})[0].string)[1:]
-
         except Exception:
+            log.exception("Failed to get availability")
             return self.MISSING
 
     def _get_availability_crawl(self, soup: BeautifulSoup) -> str:
@@ -51,6 +54,6 @@ class Zoopla(Site):
         try:
             raw_url = listing.select('a[data-testid="listing-details-link"]')[0]["href"]
             return Zoopla.PREPEND + str(re.sub(r"\?search_identifier=[a-f0-9]*", "", raw_url))
-
         except Exception:
+            log.exception("Failed to get link")
             return self.MISSING

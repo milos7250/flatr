@@ -1,3 +1,4 @@
+import logging
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING
 
@@ -11,39 +12,54 @@ if TYPE_CHECKING:
 
 from .listing import Listing
 
+log = logging.getLogger(__name__)
+
 
 class Site(ABC):
     MISSING = "Missing"
 
     def __init__(self, link: str, headers: Dict[str, str] = dict()):
         self.link = link
-        self.response = requests.get(self.link, headers=headers)
-        self.soup = BeautifulSoup(self.response.text, "html.parser")
+        try:
+            self.response = requests.get(self.link, headers=headers)
+            self.soup = BeautifulSoup(self.response.text, "html.parser")
+        except Exception:
+            log.exception("Failed to initialize site")
 
     def get_listings(self) -> List[Listing]:
-        raw_listings = self._get_raw_listings()
-        listings = []
-        for listing in raw_listings:
-            listings.append(self._parse_listing(listing))
-
-        return listings[::-1]
+        try:
+            raw_listings = self._get_raw_listings()
+            listings = []
+            for listing in raw_listings:
+                listings.append(self._parse_listing(listing))
+            return listings[::-1]
+        except Exception:
+            log.exception("Failed to get listings")
+            return []
 
     def _parse_listing(self, listing: Tag) -> Listing:
-        title = self._get_title(listing)
-        price = self._get_price(listing)
-        available = self._get_availability(listing=listing)
-        link = self._get_link(listing)
-
-        return Listing(title, price, available, link, self)
+        try:
+            title = self._get_title(listing)
+            price = self._get_price(listing)
+            available = self._get_availability(listing=listing)
+            link = self._get_link(listing)
+            return Listing(title, price, available, link, self)
+        except Exception:
+            log.exception("Failed to parse listing")
+            return Listing(self.MISSING, self.MISSING, self.MISSING, self.MISSING, self)
 
     def _get_availability(self, listing: Tag = None, link: str = None) -> str:
-        if link:
-            response = requests.get(link, headers=self.HEADERS)
-            soup = BeautifulSoup(response.text, "html.parser")
-            return self._get_availability_crawl(soup)
-        if listing:
-            return self._get_availability_no_crawl(listing)
-        return self.MISSING
+        try:
+            if link:
+                response = requests.get(link, headers=self.HEADERS)
+                soup = BeautifulSoup(response.text, "html.parser")
+                return self._get_availability_crawl(soup)
+            if listing:
+                return self._get_availability_no_crawl(listing)
+            return self.MISSING
+        except Exception:
+            log.exception("Failed to get availability")
+            return self.MISSING
 
     @abstractmethod
     def _get_raw_listings(self) -> ResultSet:

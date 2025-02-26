@@ -1,3 +1,4 @@
+import logging
 import re
 from typing import TYPE_CHECKING
 
@@ -6,6 +7,8 @@ if TYPE_CHECKING:
     from bs4.element import ResultSet, Tag
 
 from .site import Site
+
+log = logging.getLogger(__name__)
 
 
 class Spareroom(Site):
@@ -24,21 +27,22 @@ class Spareroom(Site):
     def _get_title(self, listing: Tag) -> str:
         try:
             return str(listing.h2.string).strip()
-
         except Exception:
+            log.exception("Failed to get title")
             return Spareroom.MISSING
 
     def _get_price(self, listing: Tag) -> str:
         try:
             return str(listing.header.a.strong.get_text())
         except Exception:
+            log.exception("Failed to get price")
             return Spareroom.MISSING
 
     def _get_availability_no_crawl(self, listing: Tag) -> str:
         try:
             return str(listing.select("div.listing-results-content.desktop")[0].strong.get_text())
-
         except Exception:
+            log.exception("Failed to get availability")
             return Spareroom.MISSING
 
     def _get_availability_crawl(self, soup: BeautifulSoup) -> str:
@@ -48,6 +52,6 @@ class Spareroom(Site):
         try:
             raw_link = listing.select('a[class="advertDescription"]')[0]["href"]
             return Spareroom.PREPEND + str(re.sub(r"&search_id=.*", "", raw_link))
-
         except Exception:
+            log.exception("Failed to get link")
             return Spareroom.MISSING
