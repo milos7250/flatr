@@ -1,0 +1,8 @@
+pandas>=1
+gspread>=5
+cachetools>=4
+requests>=2
+beautifulsoup4>=4
+tqdm>=4.67
+rich>=13
+-e .
