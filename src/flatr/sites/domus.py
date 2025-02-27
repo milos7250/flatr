@@ -21,10 +21,10 @@ class Domus(Site):
     def __init__(self, link: str):
         super().__init__(link, headers=Domus.HEADERS)
 
-    def _get_raw_listings(self) -> ResultSet:
+    def _get_raw_listings(self) -> "ResultSet":
         return self.soup.find_all("div", {"class": "property-overview-wrapper"})
 
-    def _get_title(self, listing: Tag) -> str:
+    def _get_title(self, listing: "Tag") -> str:
         try:
             raw_title = listing.select("div[class=property-excerpt]")[0].text.strip().strip(".")
             location = ", ".join(
@@ -41,17 +41,17 @@ class Domus(Site):
             log.exception("Failed to get title")
             return self.MISSING
 
-    def _get_price(self, listing: Tag) -> str:
+    def _get_price(self, listing: "Tag") -> str:
         try:
             return str(listing.select_one("span[class=rental-price]").text)
         except Exception:
             log.exception("Failed to get price")
             return self.MISSING
 
-    def _get_availability_no_crawl(self, listing: Tag) -> str:
+    def _get_availability_no_crawl(self, listing: "Tag") -> str:
         return self.MISSING
 
-    def _get_availability_crawl(self, soup: BeautifulSoup) -> str:
+    def _get_availability_crawl(self, soup: "BeautifulSoup") -> str:
         try:
             strdate = soup.select_one("p[class=available-from]").text.replace("Available from: ", "").strip()
             try:
@@ -63,7 +63,7 @@ class Domus(Site):
             log.exception("Failed to get availability")
             return self.MISSING
 
-    def _get_link(self, listing: Tag) -> str:
+    def _get_link(self, listing: "Tag") -> str:
         try:
             raw_link = str(listing.select_one("a[class=property-title-link]")["href"])
             return Domus.PREPEND + raw_link

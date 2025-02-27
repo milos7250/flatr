@@ -20,24 +20,24 @@ class Gumtree(Site):
     def __init__(self, link: str):
         super().__init__(link, headers=Gumtree.HEADERS)
 
-    def _get_raw_listings(self) -> ResultSet:
+    def _get_raw_listings(self) -> "ResultSet":
         return self.soup.find_all("a", {"data-q": "search-result-anchor"})
 
-    def _get_title(self, listing: Tag) -> str:
+    def _get_title(self, listing: "Tag") -> str:
         try:
             return str(listing.find_all("div", {"data-q": "tile-title"})[0].string).strip()
         except Exception:
             log.exception("Failed to get title")
             return self.MISSING
 
-    def _get_price(self, listing: Tag) -> str:
+    def _get_price(self, listing: "Tag") -> str:
         try:
             return str(listing.find_all("div", {"data-q": "tile-price"})[0].string)
         except Exception:
             log.exception("Failed to get price")
             return self.MISSING
 
-    def _get_availability_no_crawl(self, listing: Tag) -> str:
+    def _get_availability_no_crawl(self, listing: "Tag") -> str:
         try:
             div = listing.find_all("div", {"data-q": "tile-description"})[0].div
             details = [span.text for span in div.find_all("span")]
@@ -46,10 +46,10 @@ class Gumtree(Site):
             log.exception("Failed to get availability")
             return self.MISSING
 
-    def _get_availability_crawl(self, soup: BeautifulSoup) -> str:
+    def _get_availability_crawl(self, soup: "BeautifulSoup") -> str:
         return self.MISSING
 
-    def _get_link(self, listing: Tag) -> str:
+    def _get_link(self, listing: "Tag") -> str:
         try:
             return Gumtree.PREPEND + str(listing["href"])
         except Exception:

@@ -19,10 +19,10 @@ class Rightmove(Site):
     def __init__(self, link: str):
         super().__init__(link, headers=Rightmove.HEADERS)
 
-    def _get_raw_listings(self) -> ResultSet:
+    def _get_raw_listings(self) -> "ResultSet":
         return self.soup.find_all("div", {"data-testid": re.compile(r"propertyCard-[0-9]{1}")})
 
-    def _get_title(self, listing: Tag) -> str:
+    def _get_title(self, listing: "Tag") -> str:
         try:
             location = listing.select("address")[0].text.strip()
             bedrooms = listing.select("span[class=PropertyInformation_bedroomsCount___2b5R]")[0].string.strip()
@@ -32,14 +32,14 @@ class Rightmove(Site):
             log.exception("Failed to get title")
             return self.MISSING
 
-    def _get_price(self, listing: Tag) -> str:
+    def _get_price(self, listing: "Tag") -> str:
         try:
             return str(listing.select("div[class=PropertyPrice_price__VL65t]")[0].string.strip())
         except Exception:
             log.exception("Failed to get price")
             return self.MISSING
 
-    def _get_availability_no_crawl(self, listing: Tag) -> str:
+    def _get_availability_no_crawl(self, listing: "Tag") -> str:
         return self.MISSING
 
     def _get_availability_crawl(self, soup) -> str:
@@ -56,7 +56,7 @@ class Rightmove(Site):
             log.exception("Failed to get availability")
             return self.MISSING
 
-    def _get_link(self, listing: Tag) -> str:
+    def _get_link(self, listing: "Tag") -> str:
         try:
             raw_link = listing.select("a[class=propertyCard-link]")[0]["href"]
             return Rightmove.PREPEND + str(re.sub(r"#/\?channel=RES_LET", "", raw_link))
