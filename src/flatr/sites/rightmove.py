@@ -51,7 +51,7 @@ class Rightmove(Site):
                 return datetime.strptime(strdate, "%d/%m/%Y").strftime("%d/%m/%Y")
             except Exception:
                 log.exception(f"Failed to parse date: {strdate}.")
-                return strdate
+                return str(strdate)
         except Exception:
             log.exception("Failed to get availability")
             return self.MISSING
