@@ -4,10 +4,11 @@ import os
 import sys
 import warnings
 from datetime import datetime
-from typing import List
+from typing import List, Literal
 
 import bs4
 import gspread
+import pandas as pd
 import requests
 from email_client import EmailClient
 from gspread.spreadsheet import Spreadsheet
@@ -39,9 +40,12 @@ SITE_CLASSES = {
     "Zoopla": sites.Zoopla,
     "Domus": sites.Domus,
 }
+SITE_KEYS = Literal[
+    "GrantProperty", "Gumtree", "OnTheMarket", "Rightmove", "Spareroom", "ZoneLetting", "Zoopla", "Domus"
+]
 
 logging.basicConfig(
-    level=LOG_LEVEL,
+    level=logging.WARN,
     format="([green]%(name)s[/green]) %(message)s",
     datefmt="[%X]",
     handlers=[
@@ -52,6 +56,7 @@ logging.basicConfig(
     ],
 )
 log = logging.getLogger("updater")
+log.setLevel(LOG_LEVEL)
 warnings.filterwarnings("ignore", ".*rich is experimental/alpha.*")
 log.info("Starting updater...")
 
@@ -69,14 +74,20 @@ def open_worksheet(gsheet: Spreadsheet, site: str):
     try:
         return gsheet.worksheet(site)
 
-    except gspread.WorksheetNotFound:
+    except gspread.exceptions.WorksheetNotFound:
         return gsheet.add_worksheet(title=site, rows=ROWS, cols=COLS)
 
 
-def update_site(gsheet: Spreadsheet, site: str, link: str) -> DataFrame:
+def is_available_after(date: str, listing: Listing) -> bool:
+    return isinstance(listing.site, sites.Domus) or (
+        datetime.strptime(listing.available, "%d/%m/%Y") >= datetime.strptime(date, "%d/%m/%Y")
+    )
+
+
+def update_site(gsheet: Spreadsheet, site: SITE_KEYS, link: str, filter_date: str) -> DataFrame:
     try:
         # Accessing current flats for site
-        worksheet = open_worksheet(gsheet, site)
+        worksheet = open_worksheet(gsheet, f"{site}-all")
         flats = DataFrame(worksheet.get_all_records())
         headers = [flats.columns.values.tolist()]
         current_entries = flats.values.tolist()
@@ -86,6 +97,7 @@ def update_site(gsheet: Spreadsheet, site: str, link: str) -> DataFrame:
 
         # Cast scraped flats to DataFrame
         scraped_flats = DataFrame(list(map(dict, listings)), columns=COLUMNS)
+        log.debug(f"Scraped {len(scraped_flats)} flats:\n{scraped_flats}")
 
         # Check if any new flats are found
         if not flats.empty:
@@ -104,6 +116,8 @@ def update_site(gsheet: Spreadsheet, site: str, link: str) -> DataFrame:
         new_flats.insert(3, "Added", now())
         new_flats["Notes"] = ""
 
+        log.debug(f"Found {len(listings)} new flats:\n{new_flats}")
+
         # Sheet for site is empty -> first flats in sheet, use all
         if flats.empty:
             headers = [new_flats.columns.values.tolist()]
@@ -111,7 +125,33 @@ def update_site(gsheet: Spreadsheet, site: str, link: str) -> DataFrame:
         else:
             worksheet.update(headers + current_entries + new_flats.values.tolist())
 
-        return new_flats
+        # Filter new flats by availability
+        listings_filtered = [listing for listing in listings if is_available_after(filter_date, listing)]
+
+        # Cast new flats to DataFrame, add timestamp and notes
+        new_flats_filtered = DataFrame(list(map(dict, listings_filtered)), columns=COLUMNS)
+        new_flats_filtered["Available"] = pd.to_datetime(new_flats_filtered["Available"], format="%d/%m/%Y")
+        new_flats_filtered = new_flats_filtered.sort_values(by="Available")
+        new_flats_filtered["Available"] = new_flats_filtered["Available"].dt.strftime("%d/%m/%Y")
+
+        log.info(f"{len(listings_filtered)} new flats passed date filtering:\n{new_flats_filtered}")
+
+        new_flats_filtered.insert(3, "Added", now())
+        new_flats_filtered["Notes"] = ""
+
+        worksheet = open_worksheet(gsheet, site)
+        flats = DataFrame(worksheet.get_all_records())
+        headers = [flats.columns.values.tolist()]
+        current_entries = flats.values.tolist()
+
+        # Sheet for site is empty -> first flats in sheet, use all
+        if flats.empty:
+            headers = [new_flats_filtered.columns.values.tolist()]
+            worksheet.update(headers + new_flats_filtered.values.tolist())
+        else:
+            worksheet.update(headers + current_entries + new_flats_filtered.values.tolist())
+
+        return new_flats_filtered
 
     except Exception:
         log.exception(f"Failed to update google sheet for site {site}!")
@@ -138,13 +178,13 @@ def main() -> None:
 
     # Accessing the Google Sheets
     google_credentials = os.path.join(SRC_DIR, config["google_credentials"])
-    gc = gspread.service_account(filename=google_credentials)
+    gc = gspread.auth.service_account(filename=google_credentials)
     gsheet = gc.open(spreadsheet)
 
     email_body = ""
 
     for site in sites.keys():
-        flats = update_site(gsheet, site, sites[site])
+        flats = update_site(gsheet, site, sites[site], config["filter_date"])
 
         if not flats.empty:
             # Add divider between sites
