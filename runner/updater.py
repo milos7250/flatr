@@ -39,6 +39,7 @@ SITE_CLASSES = {
     "ZoneLetting": sites.ZoneLetting,
     "Zoopla": sites.Zoopla,
     "Domus": sites.Domus,
+    "MurrayAndCurrie": sites.MurrayAndCurrie,
 }
 SITE_KEYS = Literal[
     "GrantProperty", "Gumtree", "OnTheMarket", "Rightmove", "Spareroom", "ZoneLetting", "Zoopla", "Domus"
@@ -169,6 +170,7 @@ def main() -> None:
 
     try:
         sites = config["sites"]
+        # sites = {key: value for key, value in sites.items() if key in ["MurrayAndCurrie"]}
         email_config = config["email"]
         spreadsheet = config["spreadsheet"]
 
