@@ -6,7 +6,7 @@ if TYPE_CHECKING:
     from bs4 import BeautifulSoup
     from bs4.element import ResultSet, Tag
 
-from . import Site
+from .site import Site
 
 log = logging.getLogger(__name__)
 

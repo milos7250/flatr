@@ -11,6 +11,10 @@ log = logging.getLogger(__name__)
 
 
 class ZoneLetting(Site):
+    HEADERS = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36",
+        "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
+    }
     PREPEND = "https://zonegroup.co.uk"
 
     def __init__(self, link: str):
@@ -43,13 +47,8 @@ class ZoneLetting(Site):
         return self.MISSING
 
     def _get_availability_crawl(self, soup: "BeautifulSoup") -> str:
-        try:
-            return str(
-                soup.select('div[class="zText semiMediumText semiBoldWeight metaDataSectionItem"]')[0].span.string
-            )
-        except Exception:
-            log.exception("Failed to get availability")
-            return self.MISSING
+        date = str(soup.select_one('div[class="zText semiMediumText semiBoldWeight metaDataSectionItem"]').span.string)
+        return date
 
     def _get_link(self, listing: "Tag") -> str:
         try:

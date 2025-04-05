@@ -11,31 +11,31 @@ from .site import Site
 log = logging.getLogger(__name__)
 
 
-class OnTheMarket(Site):
-    PREPEND = "https://www.onthemarket.com"
+class MurrayAndCurrie(Site):
+    PREPEND = ""
     HEADERS = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.84 Safari/537.36",
         "accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8",
     }
 
     def __init__(self, link: str):
-        super().__init__(link, headers=OnTheMarket.HEADERS)
+        super().__init__(link, headers=MurrayAndCurrie.HEADERS)
 
     def _get_raw_listings(self) -> "ResultSet":
-        return self.soup.find_all("li", {"class": "otm-PropertyCard"})
+        return self.soup.find_all("div", {"class": "item-body flex-grow-1"})
 
     def _get_title(self, listing: "Tag") -> str:
         try:
-            raw_title = " ".join(listing.select('span[class="title"]')[0].a.string.split(" ")[:2])
-            location = listing.select('span[class="address"]')[0].a.string
-            return f"{raw_title} at {location}"
+            bedrooms = listing.select_one("li.h-beds span.hz-figure").text.strip()
+            location = listing.select_one("h2.item-title").text.strip()
+            return f"{bedrooms} bedroom at {location}"
         except Exception:
             log.exception("Failed to get title")
             return self.MISSING
 
     def _get_price(self, listing: "Tag") -> str:
         try:
-            return str(listing.select('div[class="otm-Price"]')[0].string)
+            return listing.select_one("li.item-price").text.strip()
         except Exception:
             log.exception("Failed to get price")
             return self.MISSING
@@ -44,19 +44,19 @@ class OnTheMarket(Site):
         return self.MISSING
 
     def _get_availability_crawl(self, soup: "BeautifulSoup") -> str:
-        date = (
-            soup.select_one("div.mb-8 ul").find(lambda tag: "Availab" in tag.text).string
-        )  # in format "Availability date: dd mmm yyyy", or "Available now"
-        if date == "Available now":
-            return datetime.now().strftime("%d/%m/%Y")
-        else:
-            date = date.string.replace("Availability date: ", "")
-            return datetime.strptime(date, "%d %b %Y").strftime("%d/%m/%Y")
+        strdate = (
+            soup.select_one("div[class='d-flex property-overview-data']").ul.select("li")[-1].text.strip()
+        )  # in format "April 1, 2025"
+        try:
+            return datetime.strptime(strdate, "%B %d, %Y").strftime("%d/%m/%Y")
+        except Exception:
+            log.exception(f"Failed to parse date: {strdate}")
+            return strdate
 
     def _get_link(self, listing: "Tag") -> str:
         try:
-            raw_link = str(listing.select('div[class="otm-PropertyCardMedia"]')[0].a["href"])
-            return OnTheMarket.PREPEND + raw_link
+            raw_link = str(listing.select_one("h2.item-title a")["href"])
+            return MurrayAndCurrie.PREPEND + raw_link
         except Exception:
             log.exception("Failed to get link")
             return self.MISSING
