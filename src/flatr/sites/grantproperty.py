@@ -11,6 +11,7 @@ from .site import Site
 log = logging.getLogger(__name__)
 
 
+# They do not exist anymore, seems they got aquired by D.J. Alexander
 class GrantProperty(Site):
     def __init__(self, link: str):
         super().__init__(link)
