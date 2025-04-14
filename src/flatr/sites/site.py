@@ -6,9 +6,11 @@ import requests
 from bs4 import BeautifulSoup
 
 if TYPE_CHECKING:
-    from typing import Dict, List
+    from typing import Dict, List, Union
 
-    from bs4.element import ResultSet, Tag
+    from bs4.element import ResultSet
+
+from bs4.element import Tag
 
 from .listing import Listing
 
@@ -48,15 +50,13 @@ class Site(ABC):
             log.exception("Failed to parse listing")
             return Listing(self.MISSING, self.MISSING, self.MISSING, self.MISSING, self)
 
-    def _get_availability(self, listing: "Tag" = None, link: str = None) -> str:
+    def _get_availability(self, listing: "Union[Tag, Listing]" = None) -> str:
         try:
-            if link:
-                response = requests.get(link, headers=self.HEADERS)
-                soup = BeautifulSoup(response.text, "html.parser")
-                return self._get_availability_crawl(soup)
-            if listing:
+            if isinstance(listing, Listing):
+                listing.available = self._get_availability_crawl(listing.soup)
+                return listing.available
+            else:
                 return self._get_availability_no_crawl(listing)
-            return self.MISSING
         except Exception:
             log.exception("Failed to get availability")
             return self.MISSING
