@@ -21,13 +21,13 @@ from flatr import sites
 from flatr.sites.listing import Listing
 
 SRC_DIR = os.path.dirname(__file__)
-CONFIG_PATH = os.path.join(SRC_DIR, "./config+rightmove.json")
+CONFIG_PATH = os.path.join(SRC_DIR, "./config.json")
 LOG_PATH = os.path.join(SRC_DIR, "./updater.log")
 LOG_LEVEL = logging.INFO
 FLAT_DIVIDER = "\n\n" + "-" * 50 + "\n\n"
 SITE_DIVIDER = "\n\n" + "=" * 50 + "\n\n"
 ROWS = 1000
-COLS = 6
+COLS = 9
 
 SITE_CLASSES = {
     "GrantProperty": sites.GrantProperty,
@@ -49,9 +49,12 @@ logging.basicConfig(
     format="([green]%(name)s[/green]) %(message)s",
     datefmt="[%X]",
     handlers=[
-        RichHandler(rich_tracebacks=True, markup=True, tracebacks_show_locals=True),
+        RichHandler(rich_tracebacks=True, markup=True, tracebacks_show_locals=False),
         RichHandler(
-            rich_tracebacks=True, markup=True, tracebacks_show_locals=True, console=Console(file=open(LOG_PATH, "a"))
+            rich_tracebacks=True,
+            markup=True,
+            tracebacks_show_locals=True,
+            console=Console(file=open(LOG_PATH, "a"), width=200),
         ),
     ],
 )
