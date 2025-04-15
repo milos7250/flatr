@@ -44,13 +44,16 @@ class OnTheMarket(Site):
         return self.MISSING
 
     def _get_availability_crawl(self, soup: "BeautifulSoup") -> str:
-        date = (
-            soup.select_one("div.mb-8 ul").find(lambda tag: "Availab" in tag.text).string
-        )  # in format "Availability date: dd mmm yyyy", or "Available now"
+        # date in format "Availability date: dd mmm yyyy", or "Available now"
+        date = soup.select_one("div.mb-8 ul").find(lambda tag: "Availab" in tag.text)
+        if date is None:
+            log.error("Failed to get availability for one flat")
+            return self.MISSING
+        date = date.string.strip()
         if date == "Available now":
             return datetime.now().strftime("%d/%m/%Y")
         else:
-            date = date.string.replace("Availability date: ", "")
+            date = date.replace("Availability date: ", "")
             return datetime.strptime(date, "%d %b %Y").strftime("%d/%m/%Y")
 
     def _get_link(self, listing: "Tag") -> str:

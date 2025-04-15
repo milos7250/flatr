@@ -25,7 +25,11 @@ class Rightmove(Site):
     def _get_title(self, listing: "Tag") -> str:
         try:
             location = listing.select("address")[0].text.strip()
-            bedrooms = listing.select("span[class=PropertyInformation_bedroomsCount___2b5R]")[0].string.strip()
+            bedrooms = listing.select("span[class=PropertyInformation_bedroomsCount___2b5R]")
+            if len(bedrooms) > 0:
+                bedrooms = bedrooms[0].text.strip()
+            else:
+                bedrooms = "?"
             return f"{bedrooms} bedroom(s) property at {location}"
 
         except Exception:

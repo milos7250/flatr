@@ -88,6 +88,8 @@ def open_worksheet(gsheet: Spreadsheet, site: str):
 
 
 def is_available_after(date: str, listing: Listing) -> bool:
+    if listing.available == listing.site.MISSING:
+        return True
     return isinstance(listing.site, sites.Domus) or (
         datetime.strptime(listing.available, "%d/%m/%Y") >= datetime.strptime(date, "%d/%m/%Y")
     )
@@ -161,9 +163,10 @@ def update_site(gsheet: Spreadsheet, site: SITE_KEYS, link: str, filter_date: st
 
         # Cast new flats to DataFrame, add timestamp and notes
         new_flats_passed = listings_to_dataframe(listings_passed)
-        new_flats_passed["Available"] = pd.to_datetime(new_flats_passed["Available"], format="%d/%m/%Y")
-        new_flats_passed = new_flats_passed.sort_values(by="Available")
-        new_flats_passed["Available"] = new_flats_passed["Available"].dt.strftime("%d/%m/%Y")
+        if all(new_flats_passed["Available"] != SITE_CLASSES[site].MISSING):
+            new_flats_passed["Available"] = pd.to_datetime(new_flats_passed["Available"], format="%d/%m/%Y")
+            new_flats_passed = new_flats_passed.sort_values(by="Available")
+            new_flats_passed["Available"] = new_flats_passed["Available"].dt.strftime("%d/%m/%Y")
 
         log.info(f"{len(listings_passed)} new flats passed date filtering:\n{new_flats_passed}")
 
@@ -192,7 +195,7 @@ def main() -> None:
 
     try:
         sites = config["sites"]
-        sites = {key: value for key, value in sites.items() if key in ["OnTheMarket"]}
+        # sites = {key: value for key, value in sites.items() if key in ["OnTheMarket"]}
         email_config = config["email"]
         spreadsheet = config["spreadsheet"]
 
