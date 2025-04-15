@@ -29,6 +29,21 @@ SITE_DIVIDER = "\n\n" + "=" * 50 + "\n\n"
 ROWS = 1000
 COLS = 9
 
+# Tag format is "search_string": "display_string"
+GOOD_TAGS = {
+    "unfurnished": "Unfurnished",
+    "double glaz": "Double glazing",
+    "gas": "Gas heating",
+    "dishwasher": "Dishwasher",
+}
+BAD_TAGS = {
+    "ground": "Ground floor",
+    "studio": "Studio flat",
+    "basement": "Basement flat",
+    "electric heating": "Electric heating",
+    "single glaz": "Single glazing",
+}
+
 SITE_CLASSES = {
     "GrantProperty": sites.GrantProperty,
     "Gumtree": sites.Gumtree,
@@ -101,9 +116,10 @@ def is_available_after(date: str, listing: Listing) -> bool:
 def filter_listings(filter_date: str, listings: List[Listing]) -> Tuple[List[Listing], List[Listing]]:
     for listing in tqdm(listings, desc="Filtering listings...", unit="listing"):
         listing.site._get_availability(listing)
-        gt = listing.get_tags(["unfurnished", "double glaz", "gas"])
-        gt = [{"unfurnished": "Unfurnished", "double glaz": "Double glazing", "gas": "Gas heating"}[tag] for tag in gt]
-        bt = listing.get_tags(["ground", "studio", "basement", "electric heating", "single glaz"])
+        gt = listing.get_tags(list(GOOD_TAGS.keys()))
+        gt = [GOOD_TAGS[tag] for tag in gt]
+        bt = listing.get_tags(list(BAD_TAGS.keys()))
+        bt = [BAD_TAGS[tag] for tag in bt]
         s = len(gt) - len(bt)
         p = len(bt) == 0 and is_available_after(filter_date, listing)
         listing.meta |= {"Score": s, "Good Tags": ", ".join(gt), "Bad Tags": ", ".join(bt), "Passed": p}
